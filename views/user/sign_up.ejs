@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zxx">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Male_Fashion Template" />
+    <meta name="keywords" content="Male_Fashion, unica, creative, html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Foody</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
+    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+    <link rel="stylesheet" href="css/nice-select.css" type="text/css" />
+    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .header__nav__option .sign-in-link {
+        font-size: 16px;
+        color: #333;
+        margin-right: 15px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .header__nav__option .sign-in-link:hover {
+        color: #ff7f50;
+      }
+      .signup-section {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      .signup-form,
+      .signup-image {
+        flex: 1;
+        padding: 10px;
+      }
+      .signup-form {
+        max-width: 50%;
+      }
+      .signup-image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 40%;
+      }
+      .signup-image img {
+        max-width: 100%;
+        height: auto;
+      }
+      .social-btns {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .social-btns button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+      .spacer {
+        height: 30px; /* Adjust the height as needed */
+      }
+      .form-group label {
+        font-size: 0.875rem; /* Decrease label size */
+      }
+      .form-control {
+        font-size: 0.875rem; /* Decrease input text size */
+        padding: 0.5rem; /* Decrease padding */
+      }
+      .btn-primary {
+        padding: 0.5rem 1rem; /* Decrease button padding */
+        font-size: 0.875rem; /* Decrease button text size */
+      }
+      .card-title {
+        font-size: 1.25rem; /* Decrease card title size */
+      }
+      .signup-image .sign-in-link {
+        color: #333;
+        text-decoration: none;
+      }
+      .signup-image .sign-in-link:hover {
+        color: #ff7f50;
+      }
+      .error_message{
+        color: red;
+        font-size: 0.75rem;
+        display: none;
+        
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5 mb-1">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body signup-section">
+              <div class="signup-form">
+                <h3 class="card-title text-center">Sign Up</h3>
+
+                <form id="signform" method="post"  action="/signup">
+                  <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="name"
+                      id="name"
+                      placeholder="Enter Name"
+                    />
+                    <div id="error1" class="error_message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      id="email"
+                      placeholder="Enter email"
+                    />
+                    
+                    <div id="error2" class="error_message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="phone"
+                      id="phone"
+                      placeholder="Enter phone number"
+                    />
+                    <div id="error3" class="error_message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      name="password"
+                      id="password"
+                      placeholder="Password"
+                    />
+                    <div id="error4" class="error_message"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      name="cpassword"
+                      id="confirm-password"
+                      placeholder="Confirm Password"
+                    />
+                    <div id="error5" class="error_message"></div>
+                  </div>
+                  <%if(locals.message && message.length>0){%>
+                    <div class="alert alert-danger text-center">
+                      <%=message%>
+                    </div>
+                    <%}%>
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <button type="submit" class="btn btn-primary">
+                      Sign Up
+                    </button>
+                    <div class="mt-2px">
+                      <p>or sign up with</p>
+                    </div>
+                    <div class="social-btns">
+                      <a href="/auth/google" class="btn btn-outline-danger">
+                        <img
+                          src="img/googlesignup.png"
+                          alt="Google Logo"
+                          style="width: 24px; height: 24px"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="signup-image">
+                <a href="/">
+                  <img src="img/signup.svg" alt="Shopping Site" />
+                </a>
+                <div class="text-center mt-2">
+                  <a href="/login" class="sign-in-link"
+                    >Already registered? Log in</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <%- include("../partial/user/footer.ejs")%>
+    <script>
+        const nameId = document.getElementById('name')
+        const emailId = document.getElementById('email')
+        const phoneId = document.getElementById('phone')
+        const passwordId = document.getElementById('password')
+        const cpasswordId = document.getElementById('cpassword')
+        const error1 = document.getElementById('error1')
+        const error2 = document.getElementById('error2')
+        const error3 = document.getElementById('error3')
+        const error4 = document.getElementById('error4')
+        const error5 = document.getElementById('error5')
+        const signform = document.getElementById('signform')
+
+
+        //validation functions
+        function nameValidateChecking(){
+            const nameVal = nameId.value;
+            const namePattern = /^[A-Za-z\s]+$/;
+            if(nameVal.trim() === ""){
+                error1.style.display = "block"
+                error1.innerHTML = 'the name is required'
+            }else if(!namePattern.test(nameVal)){
+                error1.style.display = 'block'
+                error1.innerHTML = 'the name only contains alphabets and spaces'
+            }else{
+                error1.style.display = 'none'
+                error1.innerHTML = ""
+            }
+        }
+
+        function emailValidateChecking(){
+            const emailVal = emailId.value;
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if(emailVal.trim() === ""){
+                error2.style.display = "block"
+                error2.innerHTML = 'this field is required'
+            }else if(!emailPattern.test(emailVal)){
+                error2.style.display = 'block'
+                error2.innerHTML = 'invalid format'
+            }else{
+                error2.style.display = 'none'
+                error2.innerHTML = ""
+            }
+        }
+
+        
+        function phoneValidateChecking(){
+            const phoneVal = phoneId.value;
+
+            if(phoneVal.trim() === ""){
+                error3.style.display = "block"
+                error3.innerHTML = 'this field is required'
+            }else if(phoneVal.length >10 || phoneVal.length < 10){
+                error3.style.display = 'block'
+                error3.innerHTML = 'type 10 digits'
+            }else{
+                error3.style.display = 'none'
+                error3.innerHTML = ""
+            }
+        }
+
+        function passValidateChecking(){
+            const passVal = passwordId.value;
+            const cpassVal = cpasswordId.value;
+            const alpha = /[a-zA-Z]/;
+            const digit = /\d/
+
+            if(passVal.length < 8){
+                error4.style.display = "block"
+                error4.innerHTML = 'should contain atleast 8 characters'
+            }else if(!alpha.test(passVal) || !digit.test(passVal)){
+                error4.style.display = 'block'
+                error4.innerHTML = 'should contain numbers and alphabets'
+            }else{
+                error4.style.display = 'none'
+                error4.innerHTML = ""
+            }
+            if(passVal !== cpassVal){
+                error5.style.display = 'block'
+                error5.innerHTML = 'password dontot match'
+            }else{
+                error5.style.display = 'none'
+                error5.innerHTML = ""
+            }
+        }
+  // Event listener for form submission
+        document.addEventListener('DOMContentLoaded',()=>{
+            signform.addEventListener('submit',(event)=>{
+
+
+
+
+
+                nameValidateChecking(),
+                emailValidateChecking(),
+                phoneValidateChecking(),
+                passValidateChecking()
+
+
+
+              // Check if any validation errors are present
+                if(
+                error1.innerHTML !== "" ||
+                error2.innerHTML !== "" ||
+                error3.innerHTML !== "" ||
+                error4.innerHTML !== "" ||
+                error5.innerHTML !== ""
+                    
+                ){console.log('prevented')
+                  event.preventDefault()}
+
+
+
+             // Check if any fields are missing
+                if(
+                    !nameId ||
+                    !emailId ||
+                    !phoneId ||
+                    !passwordId ||
+                    !cpasswordId
+
+                ){
+                  console.error('one or more fields not found')
+                  event.preventDefault()
+
+                }
+
+
+
+            })
+        })
+    </script>
+  </body>
+</html>
+
