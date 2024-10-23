@@ -4,16 +4,12 @@ const {Schema} = mongoose;
 
 
 const addressSchema = new Schema({
-    userId: {
+    user: {
         type:Schema.Types.ObjectId,
         ref:"User",
         required : true
     },
-    address: [{
-        addressType:{
-            type: String,
-            required:true
-        },
+    
         name:{
             type : String,
             required : true,
@@ -41,8 +37,12 @@ const addressSchema = new Schema({
         altPhone:{
             type: String,
             required :true,
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
         }
-    }]
+   
 })
 
 

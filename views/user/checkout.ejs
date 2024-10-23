@@ -1,0 +1,188 @@
+<%- include("../partial/user/header.ejs") %>
+
+<style>
+    /* Checkout Page Styles (No change) */
+    .checkout-container {
+        padding: 3rem 0;
+        margin-top: 8rem;
+    }
+    .checkout-row {
+        display: flex;
+        gap: 2rem;
+    }
+    .checkout-left,
+    .checkout-right {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+    .checkout-left {
+        width: 65%;
+    }
+    .checkout-right {
+        width: 30%;
+    }
+    .coupon-section {
+        margin-bottom: 20px;
+    }
+    .coupon-section input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .coupon-section button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .address-section {
+        margin-bottom: 20px;
+    }
+    .address-card {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    .address-card button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .add-new-address-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .order-summary {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+    .order-summary div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .payment-methods {
+        margin-top: 20px;
+    }
+    .place-order-btn {
+        width: 100%;
+        padding: 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container checkout-container">
+    <form action="/checkout/place-order" method="POST">
+        <div class="checkout-row">
+            <!-- Left Section: Coupon, Address -->
+            <div class="checkout-left">
+                <!-- Coupon Section -->
+                <div class="coupon-section">
+                    <h4>Have a Coupon?</h4>
+                    <input type="text" name="couponCode" placeholder="Enter coupon code">
+                </div>
+
+                <!-- Address Section -->
+                <div class="address-section">
+                    <h4>Select Delivery Address</h4>
+
+                    <% addresses.forEach(address => { %>
+                    <div class="address-card">
+                        <div>
+                            <p><%= address.landMark %>, <%= address.city %>, <%= address.pincode %></p>
+                        </div>
+                        <div>
+                            <button type="button" onclick="editAddress('<%= address._id %>')">Edit</button>
+                            <input type="radio" name="selectedAddress" value="<%= address._id %>" required>
+                        </div>
+                    </div>
+                    <% }) %>
+
+                    <button type="button" class="add-new-address-btn" onclick="addNewAddress()">Add New Address</button>
+                </div>
+            </div>
+
+            <!-- Right Section: Order Summary, Payment -->
+            <div class="checkout-right">
+                <h4>Order Summary</h4>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <% cart.items.forEach(item => { %>
+                    <div>
+                        <span><%= item.productId.productName %></span>
+                        <span>$<%= item.totalPrice %></span>
+                    </div>
+                    <% }) %>
+
+                    <div>
+                        <span>Shipping</span>
+                        <span>$<%= cart.shippingFee %></span>
+                    </div>
+                    <div>
+                        <strong>Total</strong>
+                        <strong>$<%= cart.totalPrice %></strong>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-methods">
+                    <h4>Choose Payment Method</h4>
+                    <label>
+                        <input type="radio" name="paymentMethod" value="Credit Card" required> Credit Card
+                    </label><br>
+                    <label>
+                        <input type="radio" name="paymentMethod" value="PayPal"> PayPal
+                    </label><br>
+                    <label>
+                        <input type="radio" name="paymentMethod" value="Cash on Delivery"> Cash on Delivery
+                    </label>
+                </div>
+
+                <!-- Place Order Button -->
+                <button type="submit" class="place-order-btn">Place Order</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Edit address function
+    function editAddress(addressId) {
+        // Logic to edit address
+        console.log('Editing address with ID:', addressId);
+    }
+
+    // Add new address function
+    function addNewAddress() {
+        // Logic to add new address
+        console.log('Adding new address');
+    }
+</script>
+
+<%- include("../partial/user/footer.ejs") %>

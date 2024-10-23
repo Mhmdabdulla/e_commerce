@@ -50,7 +50,7 @@ const addProducts = async (req,res)=>{
                 regularPrice : products.regularPrice,
                 salePrice : products.salePrice,
                 createdOn : new Date(),
-                quantity : products.quantity,
+                stock : products.quantity,
                 productImage : images,
                 status : 'Available'
 
@@ -219,7 +219,7 @@ const editProduct = async (req,res)=>{
             category : data.category,
             regularPrice : data.regularPrice,
             salePrice : data.salePrice,
-            quantity : data.quantity,
+            stock : data.quantity,
     
 
         }

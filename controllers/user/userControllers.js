@@ -272,6 +272,7 @@ const resendOtp =async(req,res)=>{
 const loadProducts = async (req,res)=>{
     try {
         const user = req.session.user
+       
         const categories = await Category.find({isListed:true})
         let productData = await Product.find({
             isBlocked:false,
@@ -284,7 +285,8 @@ const loadProducts = async (req,res)=>{
         
         
         if(user){
-            const userData = await User.findOne({_id:user._id})
+            const userData = await User.findOne({_id:user})
+            
             res.render('user/products',{user:userData , products:productData})
         }else{
             return res.render('user/products',{products:productData})
@@ -335,16 +337,74 @@ const transformedRelatedProducts = relatedProducts.map(prod => ({
     image: prod.productImage[0] || 'img/product-1.jpg' // Handle cases where productImage might be empty
 }));
 
-
-
+//finding user for nav bar
+const user = req.session.user
+if(user){
+    const userData = await User.findOne({_id:user})
 // Render the product details page with the product data
+res.render('user/product-details', { product ,user:userData,relatedProducts : transformedRelatedProducts});
+}else{
+    // Render the product details page with the product data
 res.render('user/product-details', { product ,relatedProducts : transformedRelatedProducts});
+}
+
+
 
     } catch (error) {
        console.log('error loading product details',error)
        res.redirect('/pageNotFound') 
     }
 }
+
+const searchResult = async (req,res) => {
+    try {
+        const query = req.query.query;
+        let products = [];
+        if (query) {
+            // Modify this logic to suit your database structure
+            products = await Product.find({ productName: new RegExp(query, 'i') });
+        }
+        res.render('user/searchResults', { products });
+    } catch (error) {
+        
+    }
+}
+
+const filterProducts = async (req, res) => {
+    try {
+        const categoryFilter = req.body.category || '';  //Selected category
+        const sortFilter = req.body.sort || 'newest'; // Sorting criteria
+
+        // Fetch filtered products
+        let productData = await Product.find({
+            isBlocked: false,
+            category: categoryFilter ? categoryFilter : { $exists: true }
+        });
+        console.log(productData)
+        console.log(sortFilter)
+
+        // Apply sorting
+        if (sortFilter === 'low-to-high') {
+            productData.sort((a, b) => a.salePrice - b.salePrice);
+        } else if (sortFilter === 'high-to-low') {
+            productData.sort((a, b) => b.salePrice - a.salePrice);
+        } else if (sortFilter === 'a-z') {
+            productData.sort((a, b) => a.productName.localeCompare(b.productName));
+        } else if (sortFilter === 'z-a') {
+            productData.sort((a, b) => b.productName.localeCompare(a.productName));
+        } else if (sortFilter === 'popularity') {
+            productData.sort((a, b) => b.rating - a.rating); // Assuming rating field
+        } else {
+            productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+        }
+
+        res.json({ products: productData });
+    } catch (error) {
+        console.log('Error filtering products', error);
+        res.status(500).json({ message: 'Failed to filter products' });
+    }
+};
+
 
 module.exports = {
     loadHomePage,
@@ -357,5 +417,7 @@ module.exports = {
     login,
     logout,
     loadProducts,
-    loadProductDetails
+    loadProductDetails,
+    searchResult,
+    filterProducts
 }

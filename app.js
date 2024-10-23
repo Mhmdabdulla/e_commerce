@@ -10,6 +10,7 @@ const adminRouter = require('./routes/adminRouter')
 const session = require('express-session')
 const passport = require('./config/passport')
 const User = require('./models/userSchema')
+const flash = require('connect-flash')
 db()
 
 
@@ -33,6 +34,16 @@ app.use((req,res,next)=>{
     next();
 })
 app.use(nocache())
+
+// Initialize connect-flash
+app.use(flash());
+
+// Middleware to make flash messages available in all views
+app.use((req, res, next) => {
+    res.locals.successMessages = req.flash('success');
+    res.locals.errorMessages = req.flash('error');
+    next();
+});
 
 app.set('view engine','ejs')
 app.set('views',path.join(__dirname,'views'))

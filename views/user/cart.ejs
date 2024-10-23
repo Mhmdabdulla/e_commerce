@@ -1,0 +1,234 @@
+<%- include("../partial/user/header.ejs") %>
+
+<style>
+    /* Cart Page Styles */
+    .cart-container {
+        padding: 3rem 0;
+        margin-top: 8rem;
+    }
+
+    .cart-empty {
+        text-align: center;
+        font-size: 1.5rem;
+        color: #888;
+    }
+
+    .cart-items {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    .cart-items img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+
+    .cart-item-details {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .cart-item-title {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .cart-item-price,
+    .cart-item-quantity,
+    .cart-item-total {
+        text-align: center;
+    }
+
+    .cart-item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quantity-btn {
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .quantity-input {
+        width: 40px;
+        text-align: center;
+    }
+
+    .remove-btn {
+        color: #d9534f;
+        cursor: pointer;
+    }
+
+    /* Checkout Styles */
+    .checkout-widget {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    .checkout-total,
+    .checkout-subtotal,
+    .checkout-shipping {
+        font-size: 1.25rem;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .checkout-button {
+        width: 100%;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+
+    .continue-shopping {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .continue-shopping a {
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
+
+<div class="container cart-container">
+    <% if (cart && cart.items.length > 0) { %>
+    <div class="row">
+        <!-- Cart Items Section -->
+        <div class="col-md-8">
+            <div class="cart-items">
+                <% cart.items.forEach(item => { %>
+                <div class="cart-item">
+                    <div class="cart-item-details">
+                        <img src="uploads/re-images/<%= item.productId.productImage[0] %>" alt="<%= item.productId.name %>">
+                        <div>
+                            <p class="cart-item-title"><%= item.productId.productName%></p>
+                        </div>
+                    </div>
+                    <div class="cart-item-price">
+                        $<%= item.price %>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" onclick="updateQuantity('<%= item.productId._id %>', 'decrement')">-</button>
+                        <input type="text" class="quantity-input" value="<%= item.quantity %>" readonly>
+                        <button class="quantity-btn" onclick="updateQuantity('<%= item.productId._id %>', 'increment')">+</button>
+                    </div>
+                    <div class="cart-item-total">
+                        $<%= item.totalPrice %>
+                    </div>
+                    <div class="remove-btn" onclick="removeFromCart('<%= item.productId._id %>')">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- Checkout Section -->
+        <div class="col-md-4">
+            <div class="checkout-widget">
+                <h4>Cart Total</h4>
+                <div class="checkout-subtotal">
+                    <span>Subtotal</span>
+                    <span>$<%= cart.items.reduce((total, item) => total + item.totalPrice, 0) %></span>
+                </div>
+                <div class="checkout-shipping">
+                    <span>Shipping Fee</span>
+                    
+                    <span><%=cart.shippingFee%></span>
+
+                </div>
+                <div class="checkout-total">
+                    <span>Total Amount</span>
+               
+                    <span>$<%=cart.totalPrice%></span>
+                    
+                </div>
+                <a href="/checkout" class="checkout-button">Proceed to Checkout</a>
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="continue-shopping">
+        <a href="/products">Continue Shopping</a>
+    </div>
+
+    <% } else { %>
+    <div class="cart-empty">Your cart is empty</div>
+    <% } %>
+</div>
+
+<script>
+    // Update quantity
+    function updateQuantity(productId, action) {
+        fetch('/cart/update', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, action })
+        })
+        .then(res => res.json())
+        .then(data => {
+          
+                if(data.message === 'Cart updated successfully'){
+                
+                window.location.reload();  // Reload the page to reflect changes
+                }else{
+                    alert(data.message)
+                    window.location.reload();
+                }
+            
+        })
+        .catch(error => console.error(error));
+    }
+
+    // Remove from cart
+    function removeFromCart(productId) {
+        fetch('/cart/remove', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message == 'Product removed from cart successfully') {
+                
+                window.location.reload();  // Reload the page to reflect changes
+            }else{
+                alert(data.message)
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error(error));
+    }
+</script>
+
+
+<%- include("../partial/user/footer.ejs") %>
