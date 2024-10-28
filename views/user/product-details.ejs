@@ -62,33 +62,49 @@
         }
 
         /*image zooming*/
-        #imageZoom{
-            border: 1px solid green;
-            width: 400px;
-            height: 400px;
-            position: relative;
-            background-repeat: no-repeat;
+        #imageZoom {
+    border: 1px solid green;
+    width: 400px;
+    height: 400px;
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: 200%; /* Double size for zoom effect */
+}
 
-        }
-        #imageZoom img{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: 0 0;
-        }
-        #imageZoom::after{
-            visibility: var(--visibility);
-            content: '';
-            width: 100%;
-            height: 100%;
-            background-color: black;
-            background-image: var(--url);
-            background-size: 200%;
-            background-position: var(--zoom-x) var(--zoom-y);
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
+#imageZoom img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 0 0;
+}
+
+/* Zoom effect styling */
+#imageZoom::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    background-image: var(--url);
+    background-size: 200%;
+    background-position: var(--zoom-x) var(--zoom-y);
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: var(--visibility, hidden);
+    pointer-events: none; /* Ignore pointer events */
+    transition: background-position 0.1s ease;
+}
+
+/* Style for thumbnails */
+.thumbnail-img {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border 0.3s;
+}
+
+.thumbnail-img.active, .thumbnail-img:hover {
+    border: 2px solid var(--primary);
+}
     </style>
 
 
@@ -148,7 +164,12 @@
                         <span class="px-2">|</span>
                         <small class="pt-1">(99 Reviews)</small>
                     </div>
-                    <h4 class="mb-3">₹<%=product.salePrice%> <small class="text-body text-decoration-line-through">$<%=product.regularPrice%></small> <small class="text-success"><%=product.productOffer%>%OFF</small></h4>
+                    <%if(product.productOffer >0){%>
+                    <h4 class="mb-3">₹<%=product.salePrice%> <small class="text-body text-decoration-line-through">₹<%=product.regularPrice%></small> <small class="text-success"><%=product.productOffer%>%OFF</small></h4>
+                    <%}else{%>
+                        <h4 class="mb-3">₹<%=product.salePrice%> </h4>
+
+                    <%}%>
                     <p class="mb-4"><%=product.description%></p>
                     <div class="d-flex mb-4">
                         <strong class="text-body me-3">Availability:</strong>
@@ -330,3 +351,37 @@
 
 
     <%- include("../partial/user/footer.ejs")%>
+    <script>
+        // Change main image when a thumbnail is clicked
+        function changeImage(src, event) {
+            // Change the main image's source
+            document.getElementById("currentImage").src = src;
+    
+            // Update the zoom background for the main image
+            document.getElementById("imageZoom").style.setProperty('--url', `url(${src})`);
+            
+            // Remove 'active' class from all thumbnails, then add to the clicked one
+            document.querySelectorAll('.thumbnail-img').forEach(img => img.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    
+        // Handle mouse move for zoom effect
+        const imageZoom = document.getElementById("imageZoom");
+        imageZoom.addEventListener("mousemove", function (e) {
+            // Calculate zoom position
+            const rect = imageZoom.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+            // Update CSS variables for zoom position and visibility
+            imageZoom.style.setProperty('--zoom-x', `${x}%`);
+            imageZoom.style.setProperty('--zoom-y', `${y}%`);
+            imageZoom.style.setProperty('--visibility', 'visible');
+        });
+    
+        // Hide zoom on mouse leave
+        imageZoom.addEventListener("mouseleave", function () {
+            imageZoom.style.setProperty('--visibility', 'hidden');
+        });
+    </script>
+    
