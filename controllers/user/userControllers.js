@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 
 
+
 const loadHomePage = async (req,res)=>{
     try {
         const user = req.session.user
@@ -18,11 +19,11 @@ const loadHomePage = async (req,res)=>{
         let productData = await Product.find({
             isBlocked:false,
             category : {$in:categories.map(category => category._id)},
-            // quantity : {$gt:0}
+           
 
         })
         productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-        productData = productData.slice(0,8)
+        
         
         
         if(user){
@@ -60,19 +61,21 @@ const loadSignup = async (req,res)=>{
     }
 }
 
+//OTP generation
 const generateOtp =()=>{
     
  return Math.floor(100000 + Math.random()*900000).toString();
 }
 
+//email verification function
  async function sendVerificationEmail(email,otp){
    
  try {
     const transporter = nodemailer.createTransport({
-        service : 'gmail',
-        port : 587,
-        secure : false,
-        requireTLS :true,
+         service : 'gmail',
+        //    port : 587,
+        //    secure : false,
+        //      requireTLS :true,
         auth : {
             user : process.env.NODEMAILER_EMAIL,
             pass : process.env.NODEMAILER_PASSWORD
@@ -87,13 +90,26 @@ const generateOtp =()=>{
      })
     return info.accepted.length > 0
  } catch (error) {
-    console.error('error when sending otp',error)
+    console.error('Error sending otp',error)
     return false;
     
  }
 
 }
 
+//Secure password hashing
+const securePassword = async function(password) {
+    try {
+        return await bcrypt.hash(password,10);
+        
+    } catch (error) {
+        console.error('Error hashing password:', error);
+        throw new Error('Password hashing failed');
+    }
+    
+}
+
+//Signup function
 const signUp = async (req,res)=>{
     
     try {
@@ -101,31 +117,31 @@ const signUp = async (req,res)=>{
         const {name , email,phone , password ,cpassword} = req.body;
      
         if(password !== cpassword){
-            return res.render('user/sign_up',{message : 'password donot match'})
+            return res.render('user/sign_up',{message : "Password do not match"})
         }
         
         
 
-        const findUser = await User.findOne({email})
-        if(findUser){
-            console.log('user exist')
-            return res.render('user/sign_up',{message : 'this email allready exist'})
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.render('user/sign_up', { message: 'Email already exists' });
         }
             
         const otp = generateOtp();
-        
-
         const emailSent = await sendVerificationEmail(email,otp)
 
         if(!emailSent){
-            return res.json('email error')
+            return res.json( {message: 'Failed to send verification email'})
         }
 
+        const hashedPassword = await securePassword(password);
         req.session.userOtp = otp;
-        req.session.user = {name,email,phone,password}
+        req.session.tempUser = {name,email,phone, password:hashedPassword}
+        
 
-        res.render('user/verify_otp')
         console.log('OTP send',otp)
+        res.render('user/verify_otp')
+        
 
         
     } catch (error) {
@@ -135,6 +151,62 @@ const signUp = async (req,res)=>{
 }
 
 
+//Verify OTP
+const verifyOtp = async function(req,res) {
+    try {
+        const {otp} = req.body;
+        console.log('OTP from user',otp)
+        if(otp === req.session.userOtp){
+            const userDeatils = req.session.tempUser;
+            const userData = new User(userDeatils);
+
+            await userData.save();
+            req.session.user = userData._id;
+
+            delete req.session.tempUser;
+            delete req.session.userOtp;
+
+            res.json({success : true , redirectUrl : "/"})
+            
+            
+        }else {
+            res.status(400).json({success : false  , message : 'invalid OTP , please try again'})
+        }
+     } catch (error) {
+  
+        console.error('Error verifying OTP:', error);
+        res.status(500).json({ success: false, message: 'Error occurred when verifying OTP' });
+    }
+}
+
+//Resend OTP
+const resendOtp =async(req,res)=>{
+    try {
+        const{email} = req.session.tempUser;
+        if(!email){
+            return res.status(400).json({success : false,message : 'Email not found in session'})
+        }
+
+        const otp = generateOtp()
+        req.session.userOtp = otp;
+
+        const emailSent = await sendVerificationEmail(email,otp)
+        if(emailSent){
+            console.log('Resend OTP',otp)
+            res.status(200).json({success : true, message: 'OTP Resend succesfully'})
+        }else{
+            res.status(500).json({success : false, message :'Failed to resend OTP' })
+            
+        }
+        
+    } catch (error) {
+        console.error('Error resending OTP:', error);
+        res.status(500).json({ success: false, message: 'An error occurred while resending OTP' });
+    }
+}
+
+
+//login function
 const loadLogin = async (req,res)=>{
     try {
         if(!req.session.user){
@@ -151,32 +223,27 @@ const loadLogin = async (req,res)=>{
 const login = async (req,res)=>{
     try {
         const {email ,password} = req.body;
-        const findUser =await User.findOne({isAdmin:0,email:email})
+        const user =await User.findOne({isAdmin:0,email:email})
        
 
-        if(!findUser){
-            return res.render('user/login',{message : 'user not found'})
+        if(!user){
+            return res.render('user/login',{message : 'User not found'})
         }
-        if(findUser.isBlocked){
-            return res.render('user/login',{message : 'user is blocked by admin'})
+        if(user.isBlocked){
+            return res.render('user/login',{message : 'User is blocked by admin'})
         }
         
-        const passwordMatch = await bcrypt.compare(password,findUser.password)
-        
-        
-
+        const passwordMatch = await bcrypt.compare(password,user.password)
         if(!passwordMatch){
-            return res.render('user/login',{message : 'password is incorrect'})
+            return res.render('user/login',{message : 'Incorrect password'})
         }
           // Store  necessary user information in session 
-        req.session.user = findUser._id;
-        
-        
+        req.session.user = user._id;
         res.redirect('/')
 
     } catch (error) {
-        console.error('error when login',error)
-        res.render('user/login',{message : 'login failed , pls try again later'})
+        console.error('Login error',error)
+        res.render('user/login',{message : 'Login failed, please try again later'})
 
         
     }
@@ -185,127 +252,151 @@ const login = async (req,res)=>{
 //logout
 const logout = async(req,res)=>{
     try {
-        req.session.destroy((err)=>{
-            if(err){
-              console.log('session destruction error',error)
-              return res.redirect('/pageNotFound')
+        req.session.destroy((error)=>{
+            if (error) {
+                console.error('Session destruction error:', error);
+                return res.redirect('/pageNotFound');
             }
-            return res.redirect('/')
+            res.redirect('/')
         })
         
     } catch (error) {
-        console.log('error occur when logout',logout)
+        console.log('Logout error',error)
         res.redirect('/pageNotFound')
     }
 }
 
-const securePassword = async function(password) {
+
+
+
+const loadProducts = async (req, res, next) => {
     try {
-        const passwordHash = await bcrypt.hash(password,10);
-        return passwordHash
-        
-    } catch (error) {
-        console.log('error when securing the password(hash)',error)
-    }
-    
-}
-
-const verifyOtp = async function(req,res) {
-    try {
-        const {otp} = req.body;
-        console.log('otp from user',otp)
-
-        if(otp === req.session.userOtp){
-            const userDeatils = req.session.user
-            //password hashing for security using bcrypt
-            const passwordHash = await securePassword(userDeatils.password)
-
-            const userData = new User({
-                name : userDeatils.name,
-                email : userDeatils.email,
-                phone : userDeatils.phone,
-                password : passwordHash
-            })
-            await userData.save();
-            req.session.user = userData._id;
-            res.json({success : true , redirectUrl : "/"})
-            
-            
-        }else {
-            res.status(400).json({success : false  , message : 'invalid OTP , please try again'})
-        }
-
-
-        
-    } catch (error) {
+      const searchQuery = req.query.searchQuery || "";
+      const { sortBy, category } = req.query;
   
-        console.error('error vrifying otp',error)
-        res.status(500).json({success:false, message:'an error occur when verifying otp'})
-    }
-}
-
-const resendOtp =async(req,res)=>{
-    try {
-        const{email} = req.session.user;
-        if(!email){
-            return res.status(400).json({success : false,message : 'Email not found in session'})
-        }
-
-        const otp = generateOtp()
-        req.session.userOtp = otp;
-
-        const emailSent = await sendVerificationEmail(email,otp)
-        if(emailSent){
-            console.log('Resend OTP',otp)
-            res.status(200).json({success : true, message: 'OTP Resend succesfully'})
-        }else{
-            res.status(500).json({success : false, message :"failed to resend OTP , please try again"})
-            
-        }
+      const page = parseInt(req.query.page) || 1;
+      const limit = 8;
+      const skip = (page - 1) * limit;
+  
+      let searchCondition = { isBlocked: false };
+  
+      if (searchQuery.trim() !== "") {
+        const regex = new RegExp(searchQuery, "i");
+        searchCondition.$or = [{ 
+            productName: regex }];
+      }
+  
+      if (category && category !== "") {
+        searchCondition.category = category;
+      } else {
+        const listedCategories = await Category.find({ isListed: true })
+          .select("_id")
+          .exec();
+        const listedCategoryIds = listedCategories.map((cat) => cat._id);
+        searchCondition.category = { $in: listedCategoryIds };
+      }
+  
+  
+      let sortCriteria = {};
+      switch (sortBy) {
+        case "popularity":
+          sortCriteria = { popularity: -1 };
+          break;
+        case "priceLowToHigh":
+          sortCriteria = { salePrice: 1 };
+          break;
+        case "priceHighToLow":
+          sortCriteria = { salePrice: -1 };
+          break;
+        case "averageRatings":
+          sortCriteria = { averageRating: -1 };
+          break;
+        case "featured":
+          sortCriteria = { isFeatured: -1 };
+          break;
+        case "newArrivals":
+          sortCriteria = { createdAt: -1 };
+          break;
+        case "aToZ":
+          sortCriteria = { productName: 1 };
+          break;
+        case "zToA":
+          sortCriteria = { productName: -1 };
+          break;
+        default:
+          sortCriteria = {};
+      }
+  
+      const products = await Product.find(searchCondition)
+        .populate("category")
+        .sort(sortCriteria)
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(); 
         
-    } catch (error) {
-        console.error('error resending otp',error)
-        res.status(500).json({success:false, message:'an error occur when resending otp'})
-    }
-}
-
-const loadProducts = async (req,res)=>{
-    try {
-        const user = req.session.user
+        const productIds = products.map(product => product._id);
+        // const averageRatings = await calculateAverageRatings(productIds);
+    
+      
+        // const productsWithRatings = products.map(product => ({
+        //   ...product,
+        //   averageRating: averageRatings[product._id.toString()]?.averageRating || 0,
+        //   totalRatings: averageRatings[product._id.toString()]?.totalRatings || 0
+        // }));
+  
+  
+  
+      const totalProducts = await Product.countDocuments(searchCondition);
+      const totalPages = Math.ceil(totalProducts / limit);
+  
+    //   let userId = req.user || req.session.user;
+    //   let userData = userId
+    //     ? await User.findById(userId).populate("cart").exec()
+    //     : null;
+    //   if (userData && userData.cart && !userData.cart.items) {
+    //     userData.cart.items = [];
+    //   }
+    //   res.locals.user = userData;
+    const user = req.session.user;
+    const userData = await User.findById(user)
+  
+      const categories = await Category.find({ isListed: true }).exec();
+  
+    //   const offer = await Offer.find()
+    //     .populate("category")
+    //     .populate("product")
+    //     .exec();
+  
+        // const bannerImage = await Image.findOne({
+        //   imageType: 'banner',
+        //   page: 'shop',
+        //   altText: 'inner'
+        // });
+  
+  
+      return res.render("user/products", {
+        user: userData,
+        products, 
+        categories: categories,
+        sortBy: sortBy || "",
+        currentPage: page,
+        totalPages: totalPages,
+        totalProducts: totalProducts,
        
-        const categories = await Category.find({isListed:true})
-        let productData = await Product.find({
-            isBlocked:false,
-            category : {$in:categories.map(category => category._id)},
-            // quantity : {$gt:0}
+        selectedCategory: category || "",
+        searchQuery,
 
-        })
-        productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-        productData = productData.slice(0,8)
-        
-        
-        if(user){
-            const userData = await User.findOne({_id:user})
-            
-            res.render('user/products',{user:userData , products:productData})
-        }else{
-            return res.render('user/products',{products:productData})
-        }
-
+      });
     } catch (error) {
-        console.log('error when loading product page',error)
-        res.redirect('/pageNotFound')
+      console.log("shop page not found:", error);
+      next(error);
     }
-}
+  };
 
 const loadProductDetails = async (req,res)=>{
     try {
        const {productId , categoryId}= req.query;
-       
- // Validate the product ID
-//  if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
-//     return res.status(400).send('Invalid Product ID.');
-// }
 
         // Validate the product ID
         if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
@@ -313,7 +404,7 @@ const loadProductDetails = async (req,res)=>{
         }
 
 // Fetch the product from the database
-const product = await Product.findById(productId).populate('category'); // Populate if category is a reference
+const product = await Product.findById(productId).populate('category'); 
 
 if (!product) {
     return res.status(404).send('Product not found.');
@@ -352,7 +443,7 @@ res.render('user/product-details', { product ,relatedProducts : transformedRelat
 
     } catch (error) {
        console.log('error loading product details',error)
-       res.redirect('/pageNotFound') 
+       res.redirect('/pageNotFount') 
     }
 }
 

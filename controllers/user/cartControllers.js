@@ -38,9 +38,7 @@ const shipping = (cart)=>{
 // Add to Cart
 const addToCart = async (req, res) => {
     const userId = req.session.user; 
-    const {productId,quantity} = req.body;
-    
-    
+    const {productId,quantity} = req.body;  
 
     try {
         // Find product details
@@ -117,6 +115,20 @@ const addToCart = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 };
+
+//cart item number on icon 
+const cartItemCount = async (req,res) =>{
+    try {
+        const userId = req.session.user; // Get user ID from session or authentication
+        const cart = await Cart.findOne({ userId });
+
+        const cartItemCount = cart ? cart.items.length : 0;
+        res.json({ cartItemCount });
+    } catch (error) {
+        console.error('Error fetching cart item count:', error);
+        res.status(500).json({ error: 'Failed to fetch cart item count' });
+    }
+}
 
 //updat cart quantity
 const updateCartQuantity = async (req, res) => {
@@ -214,6 +226,7 @@ module.exports = {
     listCart,
     addToCart,
     updateCartQuantity,
-    removeFromCart
+    removeFromCart,
+    cartItemCount
 
 }

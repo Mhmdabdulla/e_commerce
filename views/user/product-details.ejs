@@ -148,7 +148,7 @@
                         <span class="px-2">|</span>
                         <small class="pt-1">(99 Reviews)</small>
                     </div>
-                    <h4 class="mb-3">$<%=product.salePrice%> <small class="text-body text-decoration-line-through">$<%=product.regularPrice%></small> <small class="text-success"><%=product.productOffer%>%OFF</small></h4>
+                    <h4 class="mb-3">₹<%=product.salePrice%> <small class="text-body text-decoration-line-through">$<%=product.regularPrice%></small> <small class="text-success"><%=product.productOffer%>%OFF</small></h4>
                     <p class="mb-4"><%=product.description%></p>
                     <div class="d-flex mb-4">
                         <strong class="text-body me-3">Availability:</strong>
@@ -313,7 +313,7 @@
                             <%}%>
                             <div class="card-body">
                                 <a class="d-block h5 mb-2" href="/productDetails?productId=<%=relatedProducts[i]._id%>&categoryId=<%=relatedProducts[i].category%>"><%=relatedProducts[i].productName%></a>
-                               <p class="card-text"><%=relatedProducts[i].salePrice%></p>
+                               <p class="card-text">₹<%=relatedProducts[i].salePrice%></p>
                                 <a href="/cart/add?productId= <%=relatedProducts[i]._id%>" class="btn btn-primary">Add to Cart</a>
                             </div>
                             

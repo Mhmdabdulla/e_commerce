@@ -1,0 +1,44 @@
+<%- include("../partial/admin/header.ejs")%>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Order Management</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Products (Item No)</th>
+                <th>Actual Price</th>
+                <th>Discount</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach(order => { %>
+                <tr>
+                    <td><%= order.orderId %></td>
+                    <td><%= order.userId.name %></td>
+                    <td><%= order.orderedItems.length %></td>
+                    <td>₹<%= order.totalPrice.toFixed(2) %></td>
+                    <td>₹<%= order.discount.toFixed(2) %></td>
+                    <td>₹<%= order.finalAmount.toFixed(2) %></td>
+                    <td><%= order.status %></td>
+                    <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
+                    <td>Cash on Delivery</td>
+                    <td>Pending</td>
+                    <td>
+                        <a href="/admin/orders/<%= order.orderId %>" class="btn btn-primary">View</a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<%- include("../partial/admin/footer.ejs")%>

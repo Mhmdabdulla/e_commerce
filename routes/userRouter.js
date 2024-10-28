@@ -49,6 +49,7 @@ router.post('/user/change-password',userAuth,userProfile.changePassword)
 //cart
 router.get('/cart',userAuth,cartControllers.listCart)
 router.post('/cart/add',userAuth,cartControllers.addToCart)
+router.get('/cart/item-count',userAuth,cartControllers.cartItemCount)
     // Update cart quantity
 router.put('/cart/update',userAuth, cartControllers.updateCartQuantity);
     // Remove product from cart
@@ -70,7 +71,9 @@ router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 // Place order
 router.post('/checkout/place-order', userAuth, checkoutController.placeOrder);
 router.get('/orders' , userAuth,checkoutController.getOrders)
-router.get('/order/:orderId',userAuth,checkoutController.getOrderDetails)
+router.get('/orders/:orderId',userAuth,checkoutController.getOrderDetails)
+router.post('/orders/:orderId/:action',userAuth,checkoutController.cancelOrReturn)
+
 
 
 module.exports = router

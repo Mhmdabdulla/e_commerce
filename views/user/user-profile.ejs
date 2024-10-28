@@ -236,9 +236,12 @@
     const editLink = document.querySelector('.edit-link');
 
     editInfoBtn.addEventListener('click', () => {
-        // Enable form fields
-        const inputs = personalInfoForm.querySelectorAll('input');
-        inputs.forEach(input => input.disabled = false);
+   // Enable only specific form fields (excluding the email field)
+   const nameInput = document.getElementById('first-name');
+    const phoneInput = document.getElementById('mobile');
+    
+    nameInput.disabled = false;
+    phoneInput.disabled = false;
 
         // Show save and cancel buttons
         saveCancelButtons.style.display = 'inline-block';
@@ -250,11 +253,11 @@
     function savePersonalInfo() {
         // Collect form data
         const name = document.getElementById('first-name').value.trim();
-        const email = document.getElementById('email').value.trim();
+       
         const phone = document.getElementById('mobile').value.trim();
 
         // Basic validation (you can enhance this)
-        if (!name || !email || !phone) {
+        if (!name || !phone) {
             alert('All fields are required.');
             return;
         }
@@ -271,11 +274,7 @@
         nameInput.value = name;
         form.appendChild(nameInput);
 
-        const emailInput = document.createElement('input');
-        emailInput.type = 'hidden';
-        emailInput.name = 'email';
-        emailInput.value = email;
-        form.appendChild(emailInput);
+
 
         const phoneInput = document.createElement('input');
         phoneInput.type = 'hidden';

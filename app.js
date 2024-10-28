@@ -56,8 +56,10 @@ app.use(passport.session())
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
 
-app.listen( process.env.PORT, ()=>{
-    console.log('Running on 3000')
+const PORT = process.env.PORT;
+
+app.listen(PORT , ()=>{
+    console.log(`Running on ${PORT}`)
 })
  
 

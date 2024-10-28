@@ -1,1 +1,113 @@
 <%- include("../partial/user/header.ejs") %>
+
+<div class="container mt-5" style="padding-top: 5rem;">
+    <h2 class="mb-4">Order Details</h2>
+
+    <!-- Order Overview -->
+    <div class="card p-4 mb-4">
+        <h5>Order ID: <%= order.orderId %></h5>
+        <p>Order Date: <%= order.createdOn.toLocaleDateString() %></p>
+        <p>Status: <strong><%= order.status %></strong></p>
+        <p>Shipping Address: <%= order.address.landMark %>, <%= order.address.city %>, <%= order.address.pincode %></p>
+    </div>
+
+    <!-- Ordered Items -->
+    <h3 class="mb-4">Ordered Items</h3>
+    <div class="order-items">
+        <% order.orderedItems.forEach(item => { %>
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-2">
+                        <img src="/uploads/re-images/<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-fluid rounded-start">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= item.product.productName %></h5>
+                            <p class="card-text">Quantity: <%= item.quantity %></p>
+                            <p class="card-text">Price: $<%= item.price.toFixed(2) %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary mt-4">
+        <h4>Order Summary</h4>
+        <p>Subtotal: $<%= order.totalPrice.toFixed(2) %></p>
+        <% if (order.discount > 0) { %>
+            <p>Discount: -$<%= order.discount.toFixed(2) %></p>
+        <% } %>
+        <p><strong>Total: $<%= order.finalAmount.toFixed(2) %></strong></p>
+    </div>
+
+    <!-- Order Actions -->
+    <% if (order.status !== 'Returned' && order.status !== 'Cancelled' && order.status !== 'Return Request') { %>
+    <div class="order-actions mt-4 d-flex gap-3">
+        <% if (order.status === 'Delivered') { %>
+            <button class="btn btn-primary" onclick="showReturnForm()">Return Order</button>
+        <% } else { %>
+            <button class="btn btn-primary" onclick="showCancelForm()">Cancel Order</button>
+        <% } %>
+        <button class="btn btn-secondary" onclick="window.location.href='/track-order/<%= order.orderId %>'">Track Order</button>
+        <button class="btn btn-danger" onclick="window.location.href='/support'">Contact Support</button>
+    </div>
+    <%}%>
+
+    <!-- Cancellation/Return Reason Form -->
+    <div id="reasonForm" style="display: none;" class="mt-4">
+        <h4>Provide Reason</h4>
+        <textarea id="reason" class="form-control" rows="3" placeholder="Please provide your reason here..."></textarea>
+       
+        <% if (order.status === 'Delivered') { %>
+            <button class="btn btn-success mt-2" onclick="submitReason('<%= order.orderId %>', 'return')">Submit</button>
+        <% } else { %>
+            <button class="btn btn-success mt-2" onclick="submitReason('<%= order.orderId %>', 'cancel')">Submit</button>
+        <% } %>
+        
+        <button class="btn btn-secondary mt-2" onclick="hideReasonForm()">Cancel</button>
+    </div>
+</div>
+
+<script>
+function showCancelForm() {
+    document.getElementById('reasonForm').style.display = 'block';
+}
+
+function showReturnForm() {
+    document.getElementById('reasonForm').style.display = 'block';
+}
+
+function hideReasonForm() {
+    document.getElementById('reasonForm').style.display = 'none';
+}
+
+function submitReason(orderId, action) {
+    const reason = document.getElementById('reason').value;
+
+    if (!reason) {
+        alert('Please provide a reason for cancellation or return.');
+        return;
+    }
+
+    $.ajax({
+        url: `/orders/${orderId}/${action}`,
+        type: 'POST',
+        data: {
+            reason: reason
+        },
+        success: function(response) {
+            alert('Order ' + action + 'ed successfully');
+            window.location.reload(); // Reload the page to reflect changes
+        },
+        error: function(err) {
+            alert('Error ' + action + 'ing the order');
+        }
+    });
+}
+
+
+</script>
+
+<%- include("../partial/user/footer.ejs") %>

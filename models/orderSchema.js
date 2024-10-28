@@ -28,6 +28,10 @@ const orderSchema = new Schema({
         price:{
             type:Number,
             default:0
+        },
+        status:{
+            type :String,
+            default:'placed'
         }
 
     }],
@@ -65,6 +69,14 @@ const orderSchema = new Schema({
     couponApplied:{
         type:Boolean,
         default:false
+    },
+    cancellationReason:{
+        type:String,
+        default:"none"
+    },
+    returnReason:{
+        type :String,
+        default : "none"
     }
 })
 

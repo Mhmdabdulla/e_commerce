@@ -156,12 +156,12 @@ function removeOffer(producId){
                     },
                     success:(response)=>{
                         if(response.status === true){
-                            Swal.fire('Removed' , 'the offer has been removed' ,'success')
+                            Swal.fire('Removed' , 'The offer has been removed' ,'success')
                             location.reload();
                         }else if(response.status === false){
                             Swal.fire('failed')
                         }else{
-                            alert('failed to remove offer')
+                            alert('Failed to remove offer')
                         }
                     }
 
@@ -169,7 +169,7 @@ function removeOffer(producId){
             }
         })
     } catch (error) {
-        console.error('error when removing product offer',error)
+        console.error('Error when removing product offer',error)
     }
 }
 

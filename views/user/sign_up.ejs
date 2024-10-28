@@ -1,23 +1,17 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Male_Fashion Template" />
-    <meta name="keywords" content="Male_Fashion, unica, creative, html" />
+    <meta name="description" content="Foody Signup Page" />
+    <meta name="keywords" content="Foody, organic, signup, grocery" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Foody</title>
+    <title>Foody - Sign Up</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css" />
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
-    <link rel="stylesheet" href="css/nice-select.css" type="text/css" />
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css" />
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css" />
     <link rel="stylesheet" href="css/style.css" type="text/css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
@@ -74,21 +68,21 @@
         font-size: 1.5rem;
       }
       .spacer {
-        height: 30px; /* Adjust the height as needed */
+        height: 30px;
       }
       .form-group label {
-        font-size: 0.875rem; /* Decrease label size */
+        font-size: 0.875rem;
       }
       .form-control {
-        font-size: 0.875rem; /* Decrease input text size */
-        padding: 0.5rem; /* Decrease padding */
+        font-size: 0.875rem;
+        padding: 0.5rem;
       }
       .btn-primary {
-        padding: 0.5rem 1rem; /* Decrease button padding */
-        font-size: 0.875rem; /* Decrease button text size */
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
       }
       .card-title {
-        font-size: 1.25rem; /* Decrease card title size */
+        font-size: 1.25rem;
       }
       .signup-image .sign-in-link {
         color: #333;
@@ -97,11 +91,10 @@
       .signup-image .sign-in-link:hover {
         color: #ff7f50;
       }
-      .error_message{
+      .error_message {
         color: red;
         font-size: 0.75rem;
         display: none;
-        
       }
     </style>
   </head>
@@ -113,8 +106,7 @@
             <div class="card-body signup-section">
               <div class="signup-form">
                 <h3 class="card-title text-center">Sign Up</h3>
-
-                <form id="signform" method="post"  action="/signup">
+                <form id="signform" method="post" action="/signup">
                   <div class="form-group">
                     <label for="name">Full Name</label>
                     <input
@@ -135,7 +127,6 @@
                       id="email"
                       placeholder="Enter email"
                     />
-                    
                     <div id="error2" class="error_message"></div>
                   </div>
                   <div class="form-group">
@@ -171,17 +162,15 @@
                     />
                     <div id="error5" class="error_message"></div>
                   </div>
-                  <%if(locals.message && message.length>0){%>
-                    <div class="alert alert-danger text-center">
-                      <%=message%>
-                    </div>
-                    <%}%>
+                  <% if (locals.message && message.length > 0) { %>
+                  <div class="alert alert-danger text-center">
+                    <%= message %>
+                  </div>
+                  <% } %>
                   <div
                     class="d-flex justify-content-between align-items-center"
                   >
-                    <button type="submit" class="btn btn-primary">
-                      Sign Up
-                    </button>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
                     <div class="mt-2px">
                       <p>or sign up with</p>
                     </div>
@@ -213,139 +202,102 @@
       </div>
     </div>
     <div class="spacer"></div>
-    <%- include("../partial/user/footer.ejs")%>
+    <%- include("../partial/user/footer.ejs") %>
     <script>
-        const nameId = document.getElementById('name')
-        const emailId = document.getElementById('email')
-        const phoneId = document.getElementById('phone')
-        const passwordId = document.getElementById('password')
-        const cpasswordId = document.getElementById('cpassword')
-        const error1 = document.getElementById('error1')
-        const error2 = document.getElementById('error2')
-        const error3 = document.getElementById('error3')
-        const error4 = document.getElementById('error4')
-        const error5 = document.getElementById('error5')
-        const signform = document.getElementById('signform')
+      const nameId = document.getElementById('name');
+      const emailId = document.getElementById('email');
+      const phoneId = document.getElementById('phone');
+      const passwordId = document.getElementById('password');
+      const cpasswordId = document.getElementById('confirm-password');
+      const error1 = document.getElementById('error1');
+      const error2 = document.getElementById('error2');
+      const error3 = document.getElementById('error3');
+      const error4 = document.getElementById('error4');
+      const error5 = document.getElementById('error5');
+      const signform = document.getElementById('signform');
 
-
-        //validation functions
-        function nameValidateChecking(){
-            const nameVal = nameId.value;
-            const namePattern = /^[A-Za-z\s]+$/;
-            if(nameVal.trim() === ""){
-                error1.style.display = "block"
-                error1.innerHTML = 'the name is required'
-            }else if(!namePattern.test(nameVal)){
-                error1.style.display = 'block'
-                error1.innerHTML = 'the name only contains alphabets and spaces'
-            }else{
-                error1.style.display = 'none'
-                error1.innerHTML = ""
-            }
+      function nameValidateChecking() {
+        const nameVal = nameId.value;
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (nameVal.trim() === "") {
+          error1.style.display = "block";
+          error1.innerHTML = 'The name is required';
+        } else if (!namePattern.test(nameVal)) {
+          error1.style.display = 'block';
+          error1.innerHTML = 'Name can only contain alphabets and spaces';
+        } else {
+          error1.style.display = 'none';
         }
+      }
 
-        function emailValidateChecking(){
-            const emailVal = emailId.value;
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-            if(emailVal.trim() === ""){
-                error2.style.display = "block"
-                error2.innerHTML = 'this field is required'
-            }else if(!emailPattern.test(emailVal)){
-                error2.style.display = 'block'
-                error2.innerHTML = 'invalid format'
-            }else{
-                error2.style.display = 'none'
-                error2.innerHTML = ""
-            }
+      function emailValidateChecking() {
+        const emailVal = emailId.value;
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (emailVal.trim() === "") {
+          error2.style.display = "block";
+          error2.innerHTML = 'Email is required';
+        } else if (!emailPattern.test(emailVal)) {
+          error2.style.display = 'block';
+          error2.innerHTML = 'Invalid email format';
+        } else {
+          error2.style.display = 'none';
         }
+      }
 
-        
-        function phoneValidateChecking(){
-            const phoneVal = phoneId.value;
-
-            if(phoneVal.trim() === ""){
-                error3.style.display = "block"
-                error3.innerHTML = 'this field is required'
-            }else if(phoneVal.length >10 || phoneVal.length < 10){
-                error3.style.display = 'block'
-                error3.innerHTML = 'type 10 digits'
-            }else{
-                error3.style.display = 'none'
-                error3.innerHTML = ""
-            }
+      function phoneValidateChecking() {
+        const phoneVal = phoneId.value;
+        if (phoneVal.trim() === "") {
+          error3.style.display = "block";
+          error3.innerHTML = 'Phone number is required';
+        } else if (phoneVal.length !== 10) {
+          error3.style.display = 'block';
+          error3.innerHTML = 'Phone number must be 10 digits';
+        } else {
+          error3.style.display = 'none';
         }
+      }
 
-        function passValidateChecking(){
-            const passVal = passwordId.value;
-            const cpassVal = cpasswordId.value;
-            const alpha = /[a-zA-Z]/;
-            const digit = /\d/
-
-            if(passVal.length < 8){
-                error4.style.display = "block"
-                error4.innerHTML = 'should contain atleast 8 characters'
-            }else if(!alpha.test(passVal) || !digit.test(passVal)){
-                error4.style.display = 'block'
-                error4.innerHTML = 'should contain numbers and alphabets'
-            }else{
-                error4.style.display = 'none'
-                error4.innerHTML = ""
-            }
-            if(passVal !== cpassVal){
-                error5.style.display = 'block'
-                error5.innerHTML = 'password dontot match'
-            }else{
-                error5.style.display = 'none'
-                error5.innerHTML = ""
-            }
+      function passValidateChecking() {
+        const passVal = passwordId.value;
+        const cpassVal = cpasswordId.value;
+        const alpha = /[a-zA-Z]/;
+        const digit = /\d/;
+        if (passVal.length < 8) {
+          error4.style.display = 'block';
+          error4.innerHTML = 'Password must be at least 8 characters long';
+        } else if (!alpha.test(passVal) || !digit.test(passVal)) {
+          error4.style.display = 'block';
+          error4.innerHTML = 'Password must contain both letters and numbers';
+        } else {
+          error4.style.display = 'none';
         }
-  // Event listener for form submission
-        document.addEventListener('DOMContentLoaded',()=>{
-            signform.addEventListener('submit',(event)=>{
+        if (cpassVal === "") {
+          error5.style.display = 'block';
+          error5.innerHTML = 'Please confirm your password';
+        } else if (passVal !== cpassVal) {
+          error5.style.display = 'block';
+          error5.innerHTML = 'Passwords do not match';
+        } else {
+          error5.style.display = 'none';
+        }
+      }
 
+      signform.addEventListener('submit', (event) => {
+        nameValidateChecking();
+        emailValidateChecking();
+        phoneValidateChecking();
+        passValidateChecking();
 
-
-
-
-                nameValidateChecking(),
-                emailValidateChecking(),
-                phoneValidateChecking(),
-                passValidateChecking()
-
-
-
-              // Check if any validation errors are present
-                if(
-                error1.innerHTML !== "" ||
-                error2.innerHTML !== "" ||
-                error3.innerHTML !== "" ||
-                error4.innerHTML !== "" ||
-                error5.innerHTML !== ""
-                    
-                ){console.log('prevented')
-                  event.preventDefault()}
-
-
-
-             // Check if any fields are missing
-                if(
-                    !nameId ||
-                    !emailId ||
-                    !phoneId ||
-                    !passwordId ||
-                    !cpasswordId
-
-                ){
-                  console.error('one or more fields not found')
-                  event.preventDefault()
-
-                }
-
-
-
-            })
-        })
+        if (
+          error1.style.display === "block" ||
+          error2.style.display === "block" ||
+          error3.style.display === "block" ||
+          error4.style.display === "block" ||
+          error5.style.display === "block"
+        ) {
+          event.preventDefault();
+        }
+      });
     </script>
   </body>
 </html>
-

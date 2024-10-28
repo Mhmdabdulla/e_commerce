@@ -1,0 +1,117 @@
+<%- include('../partial/admin/header.ejs') %>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Order Details</h2>
+    
+    <div class="row">
+        <!-- Order Information -->
+        <div class="col-md-3">
+            <div class="card p-3 mb-4">
+                <h5>Order Information</h5>
+                <p><strong>Order ID:</strong> <%= order.orderId %></p>
+                <p><strong>Order Date:</strong> <%= order.createdOn.toLocaleDateString() %></p>
+                <p><strong>Status:</strong> <%= order.status %></p>
+            </div>
+        </div>
+        
+        <!-- Delivery Address -->
+        <div class="col-md-3">
+            <div class="card p-3 mb-4">
+                <h5>Delivery Address</h5>
+                <p><%= order.address.landMark %></p>
+                <p><%= order.address.city %>, <%= order.address.pincode %></p>
+                <p><strong>Phone:</strong> <%= order.address.phone %></p>
+            </div>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="col-md-3">
+            <div class="card p-3 mb-4">
+                <h5>Payment Information</h5>
+                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                <p><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+                <p><strong>Amount:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-md-3">
+            <div class="card p-3 mb-4">
+                <h5>Order Summary</h5>
+                <p><strong>Subtotal:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
+                <p><strong>Discount:</strong> -₹<%= order.discount.toFixed(2) %></p>
+                <p><strong>Total:</strong> ₹<%= order.finalAmount.toFixed(2) %></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Dropdown -->
+    <div class="d-flex justify-content-end mb-4">
+        <div class="form-group">
+            <% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+                <label for="orderStatus">Change Order Status</label>
+                <select class="form-control bg-info text-white" id="orderStatus" 
+                        style="border: 2px solid #007bff; border-radius: 5px;" 
+                        onchange="changeOrderStatus('<%= order.orderId %>')">
+                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                </select>
+            <% } else { %>
+                <label>Order Status: <span class="badge <%= order.status === 'Cancelled' ? 'bg-danger' : 'bg-warning' %> text-white">
+                    <%= order.status %>
+                </span></label>
+            <% } %>
+        </div>
+    </div>
+    
+
+    <!-- Ordered Products -->
+    <h4>Ordered Products</h4>
+    <div class="order-items">
+        <% order.orderedItems.forEach(item => { %>
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-2">
+                        <img src="/uploads/product-images/<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-fluid rounded-start">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= item.product.productName %></h5>
+                            <p class="card-text">Quantity: <%= item.quantity %></p>
+                            <p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    function changeOrderStatus(orderId) {
+        const status = document.getElementById('orderStatus').value;
+        $.ajax({
+            url: '/admin/changeOrderStatus',
+            method: 'POST',
+            data: {
+                orderId,
+                status
+            },
+            success: function(response) {
+                location.reload()
+                Swal.fire('Success', 'Order status updated!', 'success');
+            },
+            error: function(error) {
+                Swal.fire('Error', 'Failed to update order status', 'error');
+            }
+        });
+    }
+</script>
+
+<%- include('../partial/admin/footer.ejs') %>

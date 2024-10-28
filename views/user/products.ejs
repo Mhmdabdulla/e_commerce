@@ -1,227 +1,78 @@
+<%- include("../partial/user/header.ejs") %>
+<div class="container d-flex justify-content-center mt-4 mb-4" style="padding-top: 6rem;">
+    <form id="searchForm" action="/products" method="get" class="d-flex w-50">
+        <input id="searchInput" class="form-control rounded-pill" type="search" name="searchQuery" placeholder="Search for products..." value="<%= searchQuery %>">
+        <button class="btn btn-primary ms-2 rounded-pill"><i class="fas fa-search"></i></button>
+    </form>
+</div>
 
-
-<%- include("../partial/user/header.ejs")%>
-
-    <!-- Product Start -->
-    <div class="container-xxl py-5" style="margin-top: 5rem;">
-        
-            <div class="row g-0 gx-5 align-items-end">
-                <div class="col-lg-6">
-                    <div class="section-header text-start mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
-                        <h1 class="display-5 mb-3">Our Products</h1>
-                        <p>Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
-                    </div>
-                </div>
-                <div class="col-lg-6 text-start text-lg-end wow slideInRight" data-wow-delay="0.1s">
-                    <ul class="nav nav-pills d-inline-flex justify-content-end mb-5">
-                        <li class="nav-item me-2">
-                            <a class="btn btn-outline-primary border-2 active" data-bs-toggle="pill" href="#tab-1">Vegetable</a>
-                        </li>
-                        <li class="nav-item me-2">
-                            <a class="btn btn-outline-primary border-2" data-bs-toggle="pill" href="#tab-2">Fruits </a>
-                        </li>
-                        <li class="nav-item me-0">
-                            <a class="btn btn-outline-primary border-2" data-bs-toggle="pill" href="#tab-3">Fresh</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-                <!-- Filter Dropdown -->
-    <div class="row mb-4">
+<div class="container-xxl py-5" style="margin-top: 2rem;">
+    <div class="row g-0 gx-5 align-items-end">
         <div class="col-lg-6">
-            <select id="productFilter" class="form-select" aria-label="Filter products">
-                <option selected disabled>Sort By</option>
-                <option value="popularity">Popularity</option>
-                <option value="low-to-high">Price: Low to High</option>
-                <option value="high-to-low">Price: High to Low</option>
-                <option value="averageRating">Average Ratings</option>
-                <option value="featured">Featured</option>
-                <option value="newest">New Arrivals</option>
-                <option value="a-z">A to Z</option>
-                <option value="z-a">Z to A</option>
-            </select>
-            >
+            <div class="section-header text-start mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                <h1 class="display-5 mb-3">Our Products</h1>
+                <p>Explore our wide range of products.</p>
+            </div>
         </div>
     </div>
 
-
-
-            <div class="tab-content">
-                <div id="tab-1" class="tab-pane fade show p-0 active">
-                    <div class="row g-4" id="product-list">
-                        <!--product listing start-->
-                        
-                        <%for(let i=0;i<products.length;i++){%>
-                            <div class="col-xl-3 col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                                <div class="product-item">
-                                    <div class="position-relative bg-light overflow-hidden">
-                                        <img class="img-fluid w-100" src="uploads/re-images/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
-                                        <%if(products[i].productOffer > 0){%>
-                                            <div class="bg-secondary rounded text-white position-absolute start-0 top-0 m-4 py-1 px-3"><%=products[i].productOffer%>% off</div>
-                                        <%}%>
-                                    </div>
-                                    <div class="text-center p-4">
-                                        <a class="d-block h5 mb-2" href="/productDetails?productId=<%=products[i]._id%>&categoryId=<%=products[i].category%>"><%=products[i].productName%></a>
-                                        <span class="text-primary me-1">$<%=products[i].salePrice%></span>
-                                        <span class="text-body text-decoration-line-through">$<%=products[i].regularPrice%></span>
-                                    </div>
-                                    <div class="d-flex border-top">
-                                        <small class="w-50 text-center border-end py-2">
-                                            <a class="text-body" href="/whishlist/add?productId=<%=products[i]._id%>"><i class="fa fa-eye text-primary me-2"></i>Add to whishlist</a>
-                                        </small>
-                                        <small class="w-50 text-center py-2">
-                                            <a href="#" class="add-to-cart-btn text-body" data-product-id="<%= products[i]._id %>">
-                                                <i class="fa fa-shopping-bag text-primary me-2"></i>Add to cart
-                                            </a>
-                                        </small>
-                                        
-                                    </div>
-                                </div>
+    <div class="row g-4" id="product-list">
+        <% products.forEach(product => { %>
+            <div class="col-xl-3 col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="product-item position-relative overflow-hidden shadow rounded">
+                    <div class="product-image position-relative bg-light overflow-hidden rounded">
+                        <img class="img-fluid w-100" src="uploads/re-images/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+                        <% if (product.productOffer > 0) { %>
+                            <div class="bg-secondary rounded text-white position-absolute start-0 top-0 m-4 py-1 px-3">
+                                <%= product.productOffer %>% off
                             </div>
-                            <%}%>
-                            <!--product listing end-->
+                        <% } %>
+                        <a href="/wishlist/add?productId=<%= product._id %>" class="position-absolute top-0 end-0 m-3 text-danger" title="Add to Wishlist">
+                            <i class="fa fa-heart"></i>
+                        </a>
+                    </div>
 
-                        <div class="col-12 text-center wow fadeInUp" data-wow-delay="0.1s">
-                            <a class="btn btn-primary rounded-pill py-3 px-5" href="/products">Browse More Products</a>
-                        </div>
+                    <div class="text-center p-4">
+                        <a class="d-block h5 mb-2" href="/productDetails?productId=<%= product._id %>&categoryId=<%= product.category._id %>">
+                            <%= product.productName %>
+                        </a>
+                        <span class="text-primary me-1">₹<%= product.salePrice %></span>
+                        <% if (product.productOffer > 0) { %>
+                            <span class="text-body text-decoration-line-through">₹<%= product.regularPrice %></span>
+                        <% } %>
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        <% if (product.stock > 0) { %>
+                            <% if (user) { %>
+                                <a href="#" class="add-to-cart-btn btn btn-primary m-3" data-product-id="<%= product._id %>">Add to Cart</a>
+                            <% } else { %>
+                                <span class="btn btn-secondary m-3">Login to add to cart</span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="btn btn-danger m-3">Out of Stock</span>
+                        <% } %>
                     </div>
                 </div>
-                <!--product listing for fruits tag, i want to show products with category . will do later
-                
-                <div id="tab-2" class="tab-pane fade show p-0">
-                    <div class="row g-4">
-                        <div class="col-xl-3 col-lg-4 col-md-6">
-                            <div class="product-item">
-                                <div class="position-relative bg-light overflow-hidden">
-                                    <img class="img-fluid w-100" src="img/product-1.jpg" alt="">
-                                    <div class="bg-secondary rounded text-white position-absolute start-0 top-0 m-4 py-1 px-3">New</div>
-                                </div>
-                                <div class="text-center p-4">
-                                    <a class="d-block h5 mb-2" href="">Fresh Tomato</a>
-                                    <span class="text-primary me-1">$19.00</span>
-                                    <span class="text-body text-decoration-line-through">$29.00</span>
-                                </div>
-                                <div class="d-flex border-top">
-                                    <small class="w-50 text-center border-end py-2">
-                                        <a class="text-body" href=""><i class="fa fa-eye text-primary me-2"></i>View detail</a>
-                                    </small>
-                                    <small class="w-50 text-center py-2">
-                                        <a class="text-body" href=""><i class="fa fa-shopping-bag text-primary me-2"></i>Add to cart</a>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-
-
-
-                        <div class="col-12 text-center">
-                            <a class="btn btn-primary rounded-pill py-3 px-5" href="">Browse More Products</a>
-                        </div>
-                    </div>
-                </div>
-                 product listing for fresh tag, i want to show products with category . will do later-->
-
             </div>
-        
+        <% }) %>
     </div>
-    <!-- Product End -->
+</div>
 
+<%- include("../partial/user/footer.ejs") %>
 
-    <!-- Firm Visit Start -->
-    <div class="container-fluid bg-primary bg-icon mt-5 py-6">
-        <div class="container">
-            <div class="row g-5 align-items-center">
-                <div class="col-md-7 wow fadeIn" data-wow-delay="0.1s">
-                    <h1 class="display-5 text-white mb-3">Visit Our Firm</h1>
-                    <p class="text-white mb-0">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos. Clita erat ipsum et lorem et sit, sed stet lorem sit clita duo justo magna dolore erat amet. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos.</p>
-                </div>
-                <div class="col-md-5 text-md-end wow fadeIn" data-wow-delay="0.5s">
-                    <a class="btn btn-lg btn-secondary rounded-pill py-3 px-5" href="">Visit Now</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Firm Visit End -->
-
-
-    <!-- Testimonial Start -->
-    <div class="container-fluid bg-light bg-icon py-6">
-        <div class="container">
-            <div class="section-header text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
-                <h1 class="display-5 mb-3">Customer Review</h1>
-                <p>Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
-            </div>
-            <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.1s">
-                <div class="testimonial-item position-relative bg-white p-5 mt-4">
-                    <i class="fa fa-quote-left fa-3x text-primary position-absolute top-0 start-0 mt-n4 ms-5"></i>
-                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
-                    <div class="d-flex align-items-center">
-                        <img class="flex-shrink-0 rounded-circle" src="img/testimonial-1.jpg" alt="">
-                        <div class="ms-3">
-                            <h5 class="mb-1">Client Name</h5>
-                            <span>Profession</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-item position-relative bg-white p-5 mt-4">
-                    <i class="fa fa-quote-left fa-3x text-primary position-absolute top-0 start-0 mt-n4 ms-5"></i>
-                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
-                    <div class="d-flex align-items-center">
-                        <img class="flex-shrink-0 rounded-circle" src="img/testimonial-2.jpg" alt="">
-                        <div class="ms-3">
-                            <h5 class="mb-1">Client Name</h5>
-                            <span>Profession</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-item position-relative bg-white p-5 mt-4">
-                    <i class="fa fa-quote-left fa-3x text-primary position-absolute top-0 start-0 mt-n4 ms-5"></i>
-                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
-                    <div class="d-flex align-items-center">
-                        <img class="flex-shrink-0 rounded-circle" src="img/testimonial-3.jpg" alt="">
-                        <div class="ms-3">
-                            <h5 class="mb-1">Client Name</h5>
-                            <span>Profession</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-item position-relative bg-white p-5 mt-4">
-                    <i class="fa fa-quote-left fa-3x text-primary position-absolute top-0 start-0 mt-n4 ms-5"></i>
-                    <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet diam et eos. Clita erat ipsum et lorem et sit.</p>
-                    <div class="d-flex align-items-center">
-                        <img class="flex-shrink-0 rounded-circle" src="img/testimonial-4.jpg" alt="">
-                        <div class="ms-3">
-                            <h5 class="mb-1">Client Name</h5>
-                            <span>Profession</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Testimonial End -->
-
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
+    // Add to Cart functionality with SweetAlert
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function(event) {
             event.preventDefault();
             const productId = this.getAttribute('data-product-id');
-
-            // Send an AJAX POST request to add the product to the cart
+            this.disabled = true;
             fetch('/cart/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    
-                },
-                body: JSON.stringify({ productId, quantity: 1 }) // Assuming default quantity is 1
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, quantity: 1 })
             })
             .then(response => response.json())
             .then(data => {
@@ -233,73 +84,39 @@
                         showConfirmButton: false,
                         timer: 2000
                     });
+                    const cartCountElement = document.getElementById('cart-item-count');
+                    let currentCount = parseInt(cartCountElement.textContent) || 0;
+                    cartCountElement.textContent = currentCount + 1;
+                    cartCountElement.style.display = 'block';
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message || 'An error occurred while adding to cart.',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error!', text: data.message || 'An error occurred while adding to cart.', showConfirmButton: false, timer: 2000 });
                 }
+                this.disabled = false;
             })
             .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'An unexpected error occurred.',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error!', text: 'An unexpected error occurred.', showConfirmButton: false, timer: 2000 });
+                this.disabled = false;
             });
         });
     });
 </script>
 
-
-  <script>
-    document.getElementById('productFilter').addEventListener('change', function() {
-    const selectedFilter = this.value;
-
-    // Perform AJAX request to the filtering route
-    fetch('/filter-products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sort: selectedFilter })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update the product list on the page dynamically
-        const productList = document.getElementById('product-list');
-        productList.innerHTML = ''; // Clear current list
-
-        data.products.forEach(product => {
-            productList.innerHTML += `
-                <div class="col-xl-3 col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="product-item">
-                        <div class="position-relative bg-light overflow-hidden">
-                            <img class="img-fluid w-100" src="uploads/re-images/${product.productImage[0]}" alt="${product.productName}">
-                            ${product.productOffer > 0 ? `<div class="bg-secondary rounded text-white position-absolute start-0 top-0 m-4 py-1 px-3">${product.productOffer}% off</div>` : ''}
-                        </div>
-                        <div class="text-center p-4">
-                            <a class="d-block h5 mb-2" href="/productDetails?productId=${product._id}&categoryId=${product.category}">${product.productName}</a>
-                            <span class="text-primary me-1">$${product.salePrice}</span>
-                            <span class="text-body text-decoration-line-through">$${product.regularPrice}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
-
-  </script>
-
-
-
-    <%- include("../partial/user/footer.ejs")%>
+<style>
+    .product-item:hover .add-to-cart-btn {
+        visibility: visible;
+    }
+    .product-item .add-to-cart-btn {
+        visibility: hidden;
+    }
+    .product-image {
+        position: relative;
+        transition: all 0.3s;
+    }
+    .product-item:hover .product-image {
+        transform: scale(1.05);
+    }
+    #searchInput, .btn-primary {
+        border-radius: 50px;
+    }
+</style>

@@ -56,6 +56,10 @@ const productSchema = new Schema({
     
 },{timestamps:true});
 
+// Compound Index to optimize queries involving category, salePrice, and productOffer
+productSchema.index({ category: 1, salePrice: 1, productOffer: 1 });
+
+
 const Product = mongoose.model("Product",productSchema);
 
 module.exports = Product;

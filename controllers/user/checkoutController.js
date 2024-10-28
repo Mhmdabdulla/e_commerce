@@ -2,6 +2,7 @@ const Cart = require('../../models/cartSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema')
 const User = require('../../models/userSchema')
+const Product = require('../../models/productSchema')
 // const Coupon = require('../models/coupon');
 // const Order = require('../models/order');
 
@@ -84,12 +85,14 @@ const getOrders = async (req, res) => {
 const getOrderDetails = async (req,res) =>{
     try {
         const orderId = req.params.orderId;
-        console.log(orderId)
+     
+        
         const order = await Order.findOne({ orderId }).populate('orderedItems.product').populate('address');
 
         if (!order) {
             return res.status(404).send("Order not found");
         }
+        
 
         res.render('user/order-detail', { order });
     } catch (error) {
@@ -98,9 +101,53 @@ const getOrderDetails = async (req,res) =>{
     }
 }
 
+const cancelOrReturn = async (req,res) => {
+    const { orderId, action } = req.params;
+    const { reason } = req.body;
+
+    try {
+        const order = await Order.findOne({ orderId });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+     
+        
+
+        if (action === 'cancel') {
+            order.status = 'Cancelled';
+            order.cancellationReason = reason;
+        } else if (action === 'return') {
+            order.status = 'Return Request';
+            order.returnReason = reason;
+        }
+
+        // Update stock for each product in the order
+        for (let item of order.orderedItems) {
+            const product = await Product.findById(item.product);
+
+            if (product) {
+                product.stock += item.quantity; // Increment stock by the quantity ordered
+                await product.save(); // Save the updated product
+            }
+        }
+        
+
+        await order.save();
+        res.status(200).json({ message: `Order ${action}ed successfully` });
+    } catch (error) {
+        res.status(500).json({ message: 'Error processing your request', error });
+        console.log(error)
+    }
+}
+
+
+
 module.exports = {
     getCheckoutPage,
     placeOrder,
     getOrders,
-    getOrderDetails
+    getOrderDetails,
+    cancelOrReturn,
+
 }

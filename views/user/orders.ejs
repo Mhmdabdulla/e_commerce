@@ -74,6 +74,22 @@
     a.order-link:hover {
         text-decoration: underline;
     }
+
+    .badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: white;
+}
+
+.badge-warning { background-color: #ffc107; }
+.badge-info { background-color: #17a2b8; }
+.badge-primary { background-color: #007bff; }
+.badge-success { background-color: #28a745; }
+.badge-danger { background-color: #dc3545; }
+.badge-secondary { background-color: #6c757d; }
+.badge-dark { background-color: #343a40; }
+
 </style>
 
 <div class="container orders-container">
@@ -82,7 +98,7 @@
 
     <% if (orders.length > 0) { %>
         <% orders.forEach(order => { %>
-        <a href="/order/<%= order.orderId %>" class="order-link">
+        <a href="/orders/<%= order.orderId %>" class="order-link">
             <div class="order-item">
                 <div class="order-product-info">
                     <!-- Display first product image -->
@@ -98,13 +114,22 @@
                 <div class="order-status">
                     <!-- Show status badge based on the order status -->
                     <% if (order.status === 'Pending') { %>
-                        <span class="badge badge-pending">Pending</span>
-                    <% } else if (order.status === 'Completed') { %>
-                        <span class="badge badge-completed">Completed</span>
+                        <span class="badge badge-warning">Pending</span>
+                    <% } else if (order.status === 'Processing') { %>
+                        <span class="badge badge-info">Processing</span>
+                    <% } else if (order.status === 'Shipped') { %>
+                        <span class="badge badge-primary">Shipped</span>
+                    <% } else if (order.status === 'Delivered') { %>
+                        <span class="badge badge-success">Delivered</span>
                     <% } else if (order.status === 'Cancelled') { %>
-                        <span class="badge badge-cancelled">Cancelled</span>
+                        <span class="badge badge-danger">Cancelled</span>
+                    <% } else if (order.status === 'Return Request') { %>
+                        <span class="badge badge-secondary">Return Request</span>
+                    <% } else if (order.status === 'Returned') { %>
+                        <span class="badge badge-dark">Returned</span>
                     <% } %>
                 </div>
+                
             </div>
         </a>
         <% }); %>
