@@ -156,11 +156,17 @@
             <div class="checkout-widget">
                 <h4>Cart Total</h4>
                 <div class="checkout-subtotal">
-                    <span>Subtotal</span>
-                    <span>$<%= cart.items.reduce((total, item) => total + item.totalPrice, 0) %></span>
+                    <span>Total MRP</span>
+                    <span>$<%= cart.totalMRP %></span>
                 </div>
                 <div class="checkout-shipping">
-                    <span>Shipping Fee</span>
+                    <span>Product Discount</span>
+                    
+                    <span><%=cart.totalDiscount%></span>
+
+                </div>
+                <div class="checkout-shipping">
+                    <span>Delivery Fee</span>
                     
                     <span><%=cart.shippingFee%></span>
 
@@ -168,7 +174,7 @@
                 <div class="checkout-total">
                     <span>Total Amount</span>
                
-                    <span>$<%=cart.totalPrice%></span>
+                    <span>$<%=cart.finalAmount%></span>
                     
                 </div>
                 <a href="/checkout" class="checkout-button">Proceed to Checkout</a>

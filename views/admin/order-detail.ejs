@@ -62,9 +62,12 @@
                     <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
                 </select>
             <% } else { %>
-                <label>Order Status: <span class="badge <%= order.status === 'Cancelled' ? 'bg-danger' : 'bg-warning' %> text-white">
+                <label>Order Status: 
+                    <% const badgeClass = order.status === 'Cancelled' ? 'bg-danger' : 'bg-warning'; %>
+                    <span class="badge <%= badgeClass %> text-white">
                     <%= order.status %>
-                </span></label>
+                    </span>
+                </label>
             <% } %>
         </div>
     </div>
@@ -104,10 +107,13 @@
                 status
             },
             success: function(response) {
-                location.reload()
-                Swal.fire('Success', 'Order status updated!', 'success');
+                
+                Swal.fire('Success', 'Order status updated!', 'success').then(()=>{
+                    location.reload()
+                });
             },
             error: function(error) {
+                console.error('Error updating order status:', error);
                 Swal.fire('Error', 'Failed to update order status', 'error');
             }
         });

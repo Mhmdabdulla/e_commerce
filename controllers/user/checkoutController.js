@@ -49,7 +49,7 @@ const placeOrder = async (req,res) =>{
             userId,
             orderedItems,
             totalPrice: cart.totalPrice,
-            finalAmount: cart.totalPrice,  // No discount in COD
+            finalAmount: cart.finalAmount,  // No discount in COD
             address: selectedAddress,
             status: 'Pending',
             couponApplied: false,  // Assuming coupon is not used in COD

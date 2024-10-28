@@ -24,18 +24,25 @@ const cartSchema = new Schema({
             type:Number,
             required:true
         },
+        regularPrice: {  // add regular price for MRP calculation
+            type: Number,
+            required: true
+        },
         totalPrice:{
             type:Number,
             required:true
         },
+        
 
 
 
 }],
 
-shippingFee: { type: Number, default: 0 },  
-    totalPrice: { type: Number, required: true }
-
+    shippingFee: { type: Number, default: 0 },
+    totalPrice: { type: Number, required: true },
+    totalMRP: { type: Number, default: 0 }, // Total MRP
+    totalDiscount: { type: Number, default: 0 }, // Total discount
+    finalAmount: { type: Number, required: true } 
 })
 
 const Cart = mongoose.model("Cart",cartSchema);

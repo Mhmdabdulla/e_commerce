@@ -125,8 +125,10 @@
         },
         success :(response)=>{
             if(response.status === true){
-                location.reload()
-                Swal.fire('Offer added','the offer has been added','success')
+                
+                Swal.fire('Offer added','the offer has been added','success').then(()=>{
+                    location.reload()
+                })
             }else{
                 alert(response.message)
             }
@@ -156,8 +158,10 @@ function removeOffer(producId){
                     },
                     success:(response)=>{
                         if(response.status === true){
-                            Swal.fire('Removed' , 'The offer has been removed' ,'success')
-                            location.reload();
+                            Swal.fire('Removed' , 'The offer has been removed' ,'success').then(()=>{
+                                location.reload();
+                            })
+                            
                         }else if(response.status === false){
                             Swal.fire('failed')
                         }else{

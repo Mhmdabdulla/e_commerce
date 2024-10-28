@@ -94,6 +94,31 @@
     font-size: 1.25rem;
     cursor: pointer;
   }
+
+    /* Styles for Ordered Items Section */
+    .ordered-items-section {
+    margin-top: 20px;
+  }
+  .ordered-item-card {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  .ordered-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 15px;
+  }
+  .ordered-item-details {
+    flex: 1;
+  }
+  .ordered-item-name {
+    font-weight: bold;
+  }
 </style>
 
 <div class="container checkout-container">
@@ -158,20 +183,19 @@
 
         <!-- Order Summary -->
         <div class="order-summary">
-          <% cart.items.forEach(item => { %>
-          <div>
-            <span><%= item.productId.productName %></span>
-            <span>$<%= item.totalPrice %></span>
-          </div>
-          <% }) %>
 
           <div>
-            <span>Shipping</span>
+            <span>Price()</span>
+            <span>$<%= cart.totalPrice %></span>
+          </div>
+
+          <div>
+            <span>Delivery Fee</span>
             <span>$<%= cart.shippingFee %></span>
           </div>
           <div>
-            <strong>Total</strong>
-            <strong>$<%= cart.totalPrice %></strong>
+            <strong>Total Payable</strong>
+            <strong>$<%= cart.finalAmount %></strong>
           </div>
         </div>
 
@@ -185,11 +209,11 @@
               value="Credit Card"
               required
             />
-            Credit Card </label
+            UPI(Razor Pay) </label
           ><br />
           <label>
             <input type="radio" name="paymentMethod" value="PayPal" />
-            PayPal </label
+            Pay From Wallet </label
           ><br />
           <label>
             <input type="radio" name="paymentMethod" value="Cash on Delivery" />
@@ -202,6 +226,22 @@
       </div>
     </div>
   </form>
+
+          <!-- Ordered Items Section -->
+          <div class="ordered-items-section">
+            <h4>Ordered Items</h4>
+            <% cart.items.forEach(item => { %>
+            <div class="ordered-item-card">
+              <img src="uploads/re-images/<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="ordered-item-img" />
+              <div class="ordered-item-details">
+                <p class="ordered-item-name"><%= item.productId.productName %></p>
+                <p>Quantity: <%= item.quantity %></p>
+                <p>Price: $<%= item.totalPrice %></p>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        </div>
 
   <!-- Add Address Modal -->
   <div
