@@ -4,7 +4,15 @@ const Order = require('../../models/orderSchema')
 const User = require('../../models/userSchema')
 const Product = require('../../models/productSchema')
 // const Coupon = require('../models/coupon');
-// const Order = require('../models/order');
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+const env = require('dotenv').config();
+
+// Initialize Razorpay instance with credentials
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 
 const getCheckoutPage = async (req, res) => {
@@ -28,9 +36,6 @@ const placeOrder = async (req,res) =>{
     try {
         const { selectedAddress, paymentMethod } = req.body;
 
-        if (paymentMethod !== 'Cash on Delivery') {
-            return res.status(400).send("Only cash on delivery available");
-        }
 
         const userId = req.session.user;  
         const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -45,13 +50,20 @@ const placeOrder = async (req,res) =>{
             price: item.totalPrice
         }));
 
+        if (paymentMethod === 'Cash on Delivery') {
+            
+     
+
+
         const newOrder = new Order({
             userId,
             orderedItems,
             totalPrice: cart.totalPrice,
             finalAmount: cart.finalAmount,  // No discount in COD
+            discount : cart.totalDiscount,
             address: selectedAddress,
             status: 'Pending',
+            paymentMethod: "COD",
             couponApplied: false,  // Assuming coupon is not used in COD
         });
 
@@ -61,15 +73,69 @@ const placeOrder = async (req,res) =>{
 
         // Clear the user's cart after placing order
         await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+       // Send success response for COD to frontend
+       return res.json({ success: true });
+    } else if (paymentMethod === "Razorpay") {
+        // Create Razorpay order
+        const razorpayOrder = await razorpay.orders.create({
+          amount: cart.finalAmount * 100, // Amount in smallest currency unit (paise)
+          currency: "INR",
+          receipt: `order_rcptid_${new Date().getTime()}`,
+        });
+  
+        // Create an order in your database with the status as "Pending"
+        const newOrder = new Order({
+          userId,
+          orderedItems,
+          totalPrice: cart.totalPrice,
+          finalAmount: cart.finalAmount,
+          discount : cart.totalDiscount,
+          address: selectedAddress,
+          status: "Pending",
+          paymentMethod: "Razorpay",
+          razorpayOrderId: razorpayOrder.id,
+        });
+  
+        await newOrder.save();
 
-        // Redirect to the success page after order is placed
-        res.render('user/order-success',user);
+        // Clear the user's cart after placing order
+        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+        
+        // Send the Razorpay order details to frontend
+        return res.json({
+          razorpayOrderId: razorpayOrder.id,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          orderId: newOrder._id,
+        });
+      }
 
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error");
     }
 };
+
+//verify payment
+const verifyPayment = async (req, res) => {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
+  
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+  
+    if (generatedSignature === razorpay_signature) {
+      await Order.findByIdAndUpdate(orderId, {
+        paymentStatus: "Completed",
+        razorpayPaymentId: razorpay_payment_id,
+        status: 'Pending',
+      });
+      return res.json({ success: true });
+    } else {
+      return res.json({ success: false });
+    }
+  };
 
 const getOrders = async (req, res) => {
     try {
@@ -141,6 +207,16 @@ const cancelOrReturn = async (req,res) => {
     }
 }
 
+const orderSuccess = async(req,res) => {
+    try {
+        res.render('user/order-success')
+        
+    } catch (error) {
+        console.log('Error order success',error)
+        res.redirect('/pageNotFound')
+    }
+}
+
 
 
 module.exports = {
@@ -149,5 +225,6 @@ module.exports = {
     getOrders,
     getOrderDetails,
     cancelOrReturn,
-
+    verifyPayment,
+    orderSuccess
 }

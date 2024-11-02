@@ -9,6 +9,8 @@
         <p>Order Date: <%= order.createdOn.toLocaleDateString() %></p>
         <p>Status: <strong><%= order.status %></strong></p>
         <p>Shipping Address: <%= order.address.landMark %>, <%= order.address.city %>, <%= order.address.pincode %></p>
+        <p>Payment Method: <%= order.paymentMethod %></p>
+        <p>Payment Status: <strong><%= order.paymentStatus%></strong></p>
     </div>
 
     <!-- Ordered Items -->
@@ -24,7 +26,7 @@
                         <div class="card-body">
                             <h5 class="card-title"><%= item.product.productName %></h5>
                             <p class="card-text">Quantity: <%= item.quantity %></p>
-                            <p class="card-text">Price: $<%= item.price.toFixed(2) %></p>
+                            <p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
                         </div>
                     </div>
                 </div>
@@ -35,11 +37,11 @@
     <!-- Order Summary -->
     <div class="order-summary mt-4">
         <h4>Order Summary</h4>
-        <p>Subtotal: $<%= order.totalPrice.toFixed(2) %></p>
+        <p>Subtotal: ₹<%= order.totalPrice.toFixed(2) %></p>
         <% if (order.discount > 0) { %>
-            <p>Discount: -$<%= order.discount.toFixed(2) %></p>
+            <p>Discount: -₹<%= order.discount.toFixed(2) %></p>
         <% } %>
-        <p><strong>Total: $<%= order.finalAmount.toFixed(2) %></strong></p>
+        <p><strong>Total: ₹<%= order.finalAmount.toFixed(2) %></strong></p>
     </div>
 
     <!-- Order Actions -->
@@ -69,6 +71,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function showCancelForm() {
     document.getElementById('reasonForm').style.display = 'block';
@@ -86,7 +89,12 @@ function submitReason(orderId, action) {
     const reason = document.getElementById('reason').value;
 
     if (!reason) {
-        alert('Please provide a reason for cancellation or return.');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please provide a reason for cancellation or return.',
+            confirmButtonText: 'OK'
+        });
         return;
     }
 
@@ -97,15 +105,26 @@ function submitReason(orderId, action) {
             reason: reason
         },
         success: function(response) {
-            alert('Order ' + action + 'ed successfully');
-            window.location.reload(); // Reload the page to reflect changes
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: `Order ${action}ed successfully`,
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.reload(); // Reload the page to reflect changes
+            });
         },
         error: function(err) {
-            alert('Error ' + action + 'ing the order');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Error ${action}ing the order`,
+                confirmButtonText: 'OK'
+            });
         }
     });
 }
-
 
 </script>
 

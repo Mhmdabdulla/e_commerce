@@ -4,6 +4,7 @@ const userController = require('../controllers/user/userControllers')
 const userProfile = require('../controllers/user/userProfile')
 const cartControllers = require('../controllers/user/cartControllers')
 const checkoutController = require('../controllers/user/checkoutController')
+const wishlistController = require('../controllers/user/whishlistControllers')
 const {userAuth, adminAuth} = require('../middlewares/auth')
 
 const passport = require('passport')
@@ -55,9 +56,6 @@ router.put('/cart/update',userAuth, cartControllers.updateCartQuantity);
     // Remove product from cart
 router.delete('/cart/remove', userAuth,cartControllers.removeFromCart);
 
-//search handling
-router.get('/search',userController.searchResult)
-router.post('/filter-products',userController.filterProducts)
 
 
 //checkout handling
@@ -66,13 +64,20 @@ router.post('/filter-products',userController.filterProducts)
 router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 // Apply coupon
 // router.post('/checkout/apply-coupon', userAuth, checkoutController.applyCoupon);
-// Add new address
-// router.post('/checkout/add-address', userAuth, checkoutController.addNewAddress);
+
 // Place order
 router.post('/checkout/place-order', userAuth, checkoutController.placeOrder);
+router.post("/checkout/verify-payment", userAuth, checkoutController.verifyPayment)
+router.get('/order-success',userAuth,checkoutController.orderSuccess)
 router.get('/orders' , userAuth,checkoutController.getOrders)
 router.get('/orders/:orderId',userAuth,checkoutController.getOrderDetails)
 router.post('/orders/:orderId/:action',userAuth,checkoutController.cancelOrReturn)
+
+//whish list
+router.get('/wishlist', userAuth, wishlistController.getWishlist);
+router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
+router.delete('/wishlist/remove', userAuth, wishlistController.removeFromWishlist);
+
 
 
 

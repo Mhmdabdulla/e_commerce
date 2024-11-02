@@ -1,11 +1,46 @@
 <%- include("../partial/user/header.ejs") %>
-<div class="container d-flex justify-content-center mt-4 mb-4" style="padding-top: 6rem;">
-    <form id="searchForm" action="/products" method="get" class="d-flex w-50">
-        <input id="searchInput" class="form-control rounded-pill" type="search" name="searchQuery" placeholder="Search for products..." value="<%= searchQuery %>">
-        <button class="btn btn-primary ms-2 rounded-pill"><i class="fas fa-search"></i></button>
-    </form>
-</div>
+<style>
+    /* Product image hover effect */
+    .product-item:hover .product-image {
+        transform: scale(1.05);
+    }
+    /* Add to Cart and Wishlist button styling */
+    .wishlist-btn {
+       
+        padding: 5px;
+        border-radius: 50%;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .wishlist-btn:hover {
+        background-color: #e85050;
+    }
+    .add-to-cart-btn {
+        border-radius: 50px;
+        font-size: 0.9rem;
+        padding: 0.5rem 1.5rem;
+    }
+    /* Out of Stock button styling */
+    .btn-danger {
+        border-radius: 50px;
+        font-size: 0.9rem;
+        padding: 0.5rem 1.5rem;
+    }
+    /* Rounded search input styling */
+    #searchInput, .btn-primary {
+        border-radius: 50px;
+    }
+</style>
+            <!-- Search Form -->
+            <div class="container d-flex justify-content-center mt-4 mb-4" style="padding-top: 6rem;">
+                <form id="searchForm" action="/products" method="get" class="d-flex w-50">
+                    <input id="searchInput" class="form-control rounded-pill" type="search" name="searchQuery" placeholder="Search for products..." value="<%= searchQuery %>">
+                    <button class="btn btn-primary ms-2 rounded-pill"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            
 
+<!-- Product Start -->
 <div class="container-xxl py-5" style="margin-top: 2rem;">
     <div class="row g-0 gx-5 align-items-end">
         <div class="col-lg-6">
@@ -16,6 +51,38 @@
         </div>
     </div>
 
+    <!-- Filter and Sort Form -->
+    <form action="/products" method="GET" class="row mb-5">
+        <input type="hidden" name="searchQuery" value="<%= searchQuery %>">
+        <div class="col-md-6 mb-3" id="categoryField">
+            <label for="category" class="form-label">Select Category</label>
+            <select class="form-control" id="category" name="category" onchange="this.form.submit()">
+                <option value="">--Select Category--</option>
+                <% categories.forEach(function(category) { %>
+                    <option value="<%= category._id %>" <%= category._id == selectedCategory ? 'selected' : '' %>>
+                        <%= category.name %>
+                    </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="sortBy" class="form-label">Sort By</label>
+            <select class="form-control" name="sortBy" onchange="this.form.submit()">
+                <option value="">Sort By</option>
+                <option value="popularity" <%= sortBy === 'popularity' ? 'selected' : '' %>>Popularity</option>
+                <option value="priceLowToHigh" <%= sortBy === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+                <option value="priceHighToLow" <%= sortBy === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
+                <option value="averageRatings" <%= sortBy === 'averageRatings' ? 'selected' : '' %>>Average Ratings</option>
+                <option value="featured" <%= sortBy === 'featured' ? 'selected' : '' %>>Featured</option>
+                <option value="newArrivals" <%= sortBy === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+                <option value="aToZ" <%= sortBy === 'aToZ' ? 'selected' : '' %>>A - Z</option>
+                <option value="zToA" <%= sortBy === 'zToA' ? 'selected' : '' %>>Z - A</option>
+            </select>
+        </div>
+    </form>
+
+    <!-- Product Listing -->
     <div class="row g-4" id="product-list">
         <% products.forEach(product => { %>
             <div class="col-xl-3 col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
@@ -27,9 +94,10 @@
                                 <%= product.productOffer %>% off
                             </div>
                         <% } %>
-                        <a href="/wishlist/add?productId=<%= product._id %>" class="position-absolute top-0 end-0 m-3 text-danger" title="Add to Wishlist">
+                        <a href="#" class="wishlist-btn position-absolute top-0 end-0 m-3 text-danger" data-product-id="<%= product._id %>" title="Add to Wishlist">
                             <i class="fa fa-heart"></i>
                         </a>
+                        
                     </div>
 
                     <div class="text-center p-4">
@@ -45,12 +113,12 @@
                     <div class="d-flex justify-content-center">
                         <% if (product.stock > 0) { %>
                             <% if (user) { %>
-                                <a href="#" class="add-to-cart-btn btn btn-primary m-3" data-product-id="<%= product._id %>">Add to Cart</a>
+                                <a href="#" class="add-to-cart-btn btn btn-primary rounded-pill m-3" data-product-id="<%= product._id %>">Add to Cart</a>
                             <% } else { %>
-                                <span class="btn btn-secondary m-3">Login to add to cart</span>
+                                <span class="btn btn-secondary rounded-pill m-3">Login to add to cart</span>
                             <% } %>
                         <% } else { %>
-                            <span class="btn btn-danger m-3">Out of Stock</span>
+                            <span class="btn btn-danger rounded-pill m-3">Out of Stock</span>
                         <% } %>
                     </div>
                 </div>
@@ -58,13 +126,30 @@
         <% }) %>
     </div>
 </div>
+    <!-- Pagination -->
+    <div class="pagination-container text-center mt-4">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>&searchQuery=<%= searchQuery %>&sortBy=<%= sortBy %>&category=<%= selectedCategory %>">&laquo; Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+                <span class="current-page"><%= i %></span>
+            <% } else { %>
+                <a href="?page=<%= i %>&searchQuery=<%= searchQuery %>&sortBy=<%= sortBy %>&category=<%= selectedCategory %>"><%= i %></a>
+            <% } %>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>&searchQuery=<%= searchQuery %>&sortBy=<%= sortBy %>&category=<%= selectedCategory %>">Next &raquo;</a>
+        <% } %>
+    </div>
+</div>
+<!-- Product End -->
 
 <%- include("../partial/user/footer.ejs") %>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    // Add to Cart functionality with SweetAlert
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+  // Add to Cart functionality with SweetAlert
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function(event) {
             event.preventDefault();
             const productId = this.getAttribute('data-product-id');
@@ -102,21 +187,49 @@
     });
 </script>
 
-<style>
-    .product-item:hover .add-to-cart-btn {
-        visibility: visible;
-    }
-    .product-item .add-to-cart-btn {
-        visibility: hidden;
-    }
-    .product-image {
-        position: relative;
-        transition: all 0.3s;
-    }
-    .product-item:hover .product-image {
-        transform: scale(1.05);
-    }
-    #searchInput, .btn-primary {
-        border-radius: 50px;
-    }
-</style>
+<!--whish list-->
+<script>
+    // Add to Wishlist functionality with SweetAlert
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+          button.addEventListener('click', function(event) {
+              event.preventDefault();
+              const productId = this.getAttribute('data-product-id');
+              fetch('/wishlist/add', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ productId })
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.message === 'Product added to wishlist successfully') {
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Added to Wishlist!',
+                          text: 'The product has been added to your wishlist.',
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+                  } else {
+                      Swal.fire({
+                          icon: 'info',
+                          title: 'Info',
+                          text: data.message,
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+                  }
+              })
+              .catch(error => {
+                  console.error('Error adding to wishlist:', error);
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error!',
+                      text: 'An error occurred while adding to wishlist.',
+                      showConfirmButton: false,
+                      timer: 2000
+                  });
+              });
+          });
+      });
+  </script>
+  

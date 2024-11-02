@@ -166,6 +166,11 @@
                                 <i class="fas fa-shopping-cart me-2"></i> Cart
                             </a>
                         </li>
+                        <li class="mb-3">
+                            <a href='/wishlist' class="d-flex align-items-center">
+                                <i class="fas fa-shopping-cart me-2"></i> Whishlist
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -314,6 +319,114 @@
 <!-- Bootstrap JS and dependencies  -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Add event listeners for form submission
+    document.querySelector('form[action="/address/add"]').addEventListener('submit', validateAddForm);
+    document.getElementById('editAddressForm').addEventListener('submit', validateEditForm);
+
+    // Helper function to show error messages
+    function showError(input, message) {
+        const formGroup = input.closest('.form-group');
+        formGroup.classList.add('has-error');
+        
+        let error = formGroup.querySelector('.error');
+        if (!error) {
+            error = document.createElement('small');
+            error.className = 'error text-danger';
+            formGroup.appendChild(error);
+        }
+        error.textContent = message;
+    }
+
+    // Helper function to clear error messages
+    function clearError(input) {
+        const formGroup = input.closest('.form-group');
+        formGroup.classList.remove('has-error');
+        
+        const error = formGroup.querySelector('.error');
+        if (error) {
+            error.remove();
+        }
+    }
+
+    // Validate form fields
+    function validateForm(formId) {
+        let isValid = true;
+
+        // Define the form to be validated
+        const form = document.getElementById(formId);
+        
+        // Clear previous errors
+        form.querySelectorAll('.error').forEach(el => el.remove());
+
+        // Name validation
+        const name = form.querySelector('input[name="name"]');
+        if (name.value.trim() === "") {
+            showError(name, "Name is required.");
+            isValid = false;
+        }
+
+        // City validation
+        const city = form.querySelector('input[name="city"]');
+        if (city.value.trim() === "") {
+            showError(city, "City is required.");
+            isValid = false;
+        }
+
+        // Landmark validation
+        const landmark = form.querySelector('input[name="landMark"]');
+        if (landmark.value.trim() === "") {
+            showError(landmark, "Landmark is required.");
+            isValid = false;
+        }
+
+        // State validation
+        const state = form.querySelector('input[name="state"]');
+        if (state.value.trim() === "") {
+            showError(state, "State is required.");
+            isValid = false;
+        }
+
+        // Pincode validation (only numbers and exact length)
+        const pincode = form.querySelector('input[name="pincode"]');
+        if (!/^\d{6}$/.test(pincode.value.trim())) {
+            showError(pincode, "Enter a valid 6-digit pincode.");
+            isValid = false;
+        }
+
+        // Phone validation (only numbers and exact length)
+        const phone = form.querySelector('input[name="phone"]');
+        if (!/^\d{10}$/.test(phone.value.trim())) {
+            showError(phone, "Enter a valid 10-digit phone number.");
+            isValid = false;
+        }
+
+        // Alternate phone validation (optional but if entered, only numbers)
+        const altPhone = form.querySelector('input[name="altPhone"]');
+        if (altPhone.value.trim() !== "" && !/^\d{10}$/.test(altPhone.value.trim())) {
+            showError(altPhone, "Enter a valid 10-digit alternate phone number.");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Validate Add Address Form
+    function validateAddForm(event) {
+        if (!validateForm('addAddressModal')) {
+            event.preventDefault();
+        }
+    }
+
+    // Validate Edit Address Form
+    function validateEditForm(event) {
+        if (!validateForm('editAddressForm')) {
+            event.preventDefault();
+        }
+    }
+</script>
+
 
 <script>
     // Handle Edit Address Button Click

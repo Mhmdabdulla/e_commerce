@@ -13,12 +13,13 @@ const wishlistSchema = new Schema({
             type:Schema.Types.ObjectId,
             ref:'Product',
             required:true
-        },
-        addedOn :{
-            type:Date,
-            default:Date.now
         }
-    }]
+    }],
+
+},
+{
+    timestamps: true  // Automatically creates and manages `createdAt` and `updatedAt`
+
 })
 
 const Wishlist = mongoose.model('Wishlist',wishlistSchema);
