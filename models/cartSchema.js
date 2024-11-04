@@ -42,7 +42,11 @@ const cartSchema = new Schema({
     totalPrice: { type: Number, required: true },
     totalMRP: { type: Number, default: 0 }, // Total MRP
     totalDiscount: { type: Number, default: 0 }, // Total discount
-    finalAmount: { type: Number, required: true } 
+    finalAmount: { type: Number, required: true } ,
+    appliedCoupon: {
+        code: { type: String, default: null },
+        discountAmount: { type: Number, default: 0 }
+      }
 })
 
 const Cart = mongoose.model("Cart",cartSchema);

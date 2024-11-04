@@ -3,6 +3,7 @@
 const User = require('../../models/userSchema')
 const Product = require('../../models/productSchema')
 const Category = require('../../models/categorySchema')
+const Wallet = require('../../models/walletSchema')
 const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
 const bcrypt = require('bcrypt')
@@ -158,6 +159,16 @@ const verifyOtp = async function(req,res) {
         console.log('OTP from user',otp)
         if(otp === req.session.userOtp){
             const userDeatils = req.session.tempUser;
+            // Create a new Wallet for the user
+            const wallet = new Wallet({ balance: 0 });
+            await wallet.save();
+            
+            // Add wallet ID to user details
+             userDeatils.wallet = wallet._id;
+
+
+
+
             const userData = new User(userDeatils);
 
             await userData.save();

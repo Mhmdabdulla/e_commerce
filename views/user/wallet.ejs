@@ -1,0 +1,180 @@
+<%- include("../partial/user/header.ejs")%>
+
+<!-- Additional Styles for Profile Page -->
+<style>
+    /* Profile Page Specific Styles */
+    .profile-container {
+        padding-top: 8rem; /* Adjust based on your header height */
+        padding-bottom: 50px; /* Adjust based on your footer height */
+        background-color: #f5f5f5;
+    }
+
+    .sidebar {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        border-radius: 8px;
+    }
+
+    .sidebar .profile-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        margin-bottom: 15px;
+    }
+
+    .sidebar h2 {
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .sidebar ul li a {
+        color: #555;
+        font-size: 1rem;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .sidebar ul li a.active {
+        color: #fff;
+        background-color: #007bff;
+    }
+
+    .sidebar ul li a:hover {
+        background-color: #e9f5ff;
+        color: #007bff;
+    }
+
+    .content {
+        background-color: #fff;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+
+      /* Styles for Wallet Page */
+      .wallet-container {
+        padding-top: 8rem;
+        padding-bottom: 50px;
+        background-color: #f5f5f5;
+    }
+
+    .content .balance {
+        font-size: 1.5rem;
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+
+    .transaction-table {
+        width: 100%;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .transaction-table th, .transaction-table td {
+        padding: 12px;
+        text-align: left;
+    }
+
+    .transaction-table th {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .transaction-table td {
+        background-color: #f9f9f9;
+    }
+
+    .filter-dropdown {
+        margin-bottom: 15px;
+    }
+
+
+</style>
+
+<div class="container-fluid wallet-container">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Start -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="sidebar">
+                    <div class="text-center">
+                        <img src="/admin-assets/imgs/people/avatar2.png" alt="Profile Picture" class="rounded-circle profile-img">
+                        <h2>Hello, <%= user.name %></h2>
+                    </div>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><a href="/profile"><i class="fas fa-box me-2"></i> Dashboard</a></li>
+                        <li class="mb-3"><a href="/orders"><i class="fas fa-box me-2"></i> My Orders</a></li>
+                        <li class="mb-3"><a href="/address"><i class="fas fa-box me-2"></i> Addresses</a></li>
+                        <li class="mb-3"><a href="/cart"><i class="fas fa-shopping-cart me-2"></i> Cart</a></li>
+                        <li class="mb-3"><a href="/wishlist" ><i class="fas fa-shopping-cart me-2"></i> Wishlist</a></li>
+                        <li class="mb-3"><a href="/wallet" class="active"><i class="fas fa-wallet me-2"></i> Wallet</a></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Sidebar End -->
+
+             <!-- Wallet Content -->
+             <div class="col-lg-9 col-md-8">
+                <div class="content">
+                    <h3>My Wallet</h3>
+                    <div class="balance">Current Balance: $<%= wallet.balance.toFixed(2) %></div>
+
+                    <!-- Filter Dropdown -->
+                    <select id="transaction-filter" class="filter-dropdown form-select" onchange="filterTransactions()">
+                        <option value="all">All Transactions</option>
+                        <option value="credit">Credits</option>
+                        <option value="debit">Debits</option>
+                    </select>
+
+                    <!-- Transactions Table -->
+                    <table class="transaction-table table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-table-body">
+                            <% wallet.transactions.forEach(transaction => { %>
+                                <tr class="transaction-row" data-type="<%= transaction.type %>">
+                                    <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                                    <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
+                                    <td>$<%= transaction.amount.toFixed(2) %></td>
+                                    <td><%= transaction.description %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--wallet content end-->
+        </div>
+    </div>
+</div>
+
+<%- include("../partial/user/footer.ejs") %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function filterTransactions() {
+        const filter = document.getElementById("transaction-filter").value;
+        const rows = document.querySelectorAll(".transaction-row");
+
+        rows.forEach(row => {
+            if (filter === "all" || row.getAttribute("data-type") === filter) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
+

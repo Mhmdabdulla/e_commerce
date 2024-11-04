@@ -24,24 +24,59 @@
     width: 30%;
   }
   .coupon-section {
-    margin-bottom: 20px;
-  }
-  .coupon-section input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  .coupon-section button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+    margin: 20px 0; /* Spacing around the coupon section */
+}
+
+.coupon-section h3 {
+    font-size: 1.5rem; /* Heading size */
+    margin-bottom: 10px; /* Spacing below the heading */
+    color: #333; /* Color of the heading */
+}
+
+.coupon-input-group {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center vertically */
+}
+
+.coupon-select {
+    flex-grow: 1; /* Make the dropdown take up available space */
+    padding: 10px; /* Padding inside the dropdown */
+    border: 1px solid #ccc; /* Border styling */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 1rem; /* Font size */
+}
+
+.apply-button {
+    padding: 10px 20px; /* Padding inside the button */
+    margin-left: 10px; /* Spacing between the dropdown and button */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #28a745; /* Button color */
+    color: white; /* Text color */
+    font-size: 1rem; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.apply-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+@media (max-width: 600px) {
+    .coupon-input-group {
+        flex-direction: column; /* Stack items vertically */
+    }
+    
+    .apply-button {
+        margin-left: 0; /* Remove left margin */
+        margin-top: 10px; /* Add top margin for spacing */
+        width: 100%; /* Make button full width on mobile */
+    }
+    
+    .coupon-select {
+        width: 100%; /* Ensure dropdown is full width on mobile */
+    }
+}
+
   .address-section {
     margin-bottom: 20px;
   }
@@ -126,15 +161,25 @@
     <div class="checkout-row">
       <!-- Left Section: Coupon, Address -->
       <div class="checkout-left">
-        <!-- Coupon Section -->
-        <div class="coupon-section">
-          <h4>Have a Coupon?</h4>
-          <input
-            type="text"
-            name="couponCode"
-            placeholder="Enter coupon code"
-          />
-        </div>
+<!-- Coupon Section -->
+<div class="coupon-section">
+  <h3>Select Coupon</h3>
+  <div class="coupon-input-group">
+    <select id="couponSelect" class="coupon-select" <% if (cart.appliedCoupon && cart.appliedCoupon.code) { %> disabled <% } %>>
+      <option value="">-- Select a Coupon --</option>
+      <% coupons.forEach(coupon => { %>
+        <option value="<%= coupon.code %>" 
+          <%= cart.appliedCoupon && cart.appliedCoupon.code === coupon.code ? 'selected' : '' %>>
+          <%= coupon.code %> - <%= coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '$' + coupon.discountAmount %> off
+        </option>
+      <% }); %>
+    </select>
+    <button id="couponBtn" class="apply-button">
+      <%= cart.appliedCoupon && cart.appliedCoupon.code ? 'Remove Coupon' : 'Apply Coupon' %>
+    </button>
+  </div>
+</div>
+      
 
         <!-- Address Section -->
         <div class="address-section">
@@ -468,7 +513,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   // Handle Edit Address Button Click
@@ -668,6 +713,57 @@
       rzp.open();
     }
   };
+</script>
+
+
+
+<script>
+  document.getElementById('couponBtn').addEventListener('click', function() {
+    const selectedCoupon = document.getElementById('couponSelect').value;
+    const isCouponApplied = this.textContent.trim() === 'Remove Coupon';
+
+    // Determine the appropriate endpoint based on button state
+    const endpoint = isCouponApplied ? '/coupon/remove' : '/coupon/apply';
+    const method = isCouponApplied ? 'DELETE' : 'POST';
+
+
+
+
+    if (!selectedCoupon && !isCouponApplied) {
+      Swal.fire('Please select a coupon');
+      return;
+    }
+
+    fetch(endpoint, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ couponCode: selectedCoupon })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire(`${isCouponApplied ? 'Coupon removed' : 'Coupon applied'} successfully!`, '', 'success');
+        if (isCouponApplied) {
+            // Coupon was removed
+            document.getElementById('couponSelect').disabled = false; // Enable the coupon selection
+            document.getElementById('couponBtn').textContent = 'Apply Coupon'; // Change button text
+        } else {
+            // Coupon was applied
+            document.getElementById('couponSelect').disabled = true; // Disable coupon selection
+            document.getElementById('couponBtn').textContent = 'Remove Coupon'; // Change button text
+        }
+        
+      } else {
+        Swal.fire(data.message || 'An error occurred', '', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire('An error occurred while processing your request.', '', 'error');
+    });
+  });
 </script>
 
 

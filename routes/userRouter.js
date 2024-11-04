@@ -5,6 +5,7 @@ const userProfile = require('../controllers/user/userProfile')
 const cartControllers = require('../controllers/user/cartControllers')
 const checkoutController = require('../controllers/user/checkoutController')
 const wishlistController = require('../controllers/user/whishlistControllers')
+const couponController = require('../controllers/user/couponController')
 const {userAuth, adminAuth} = require('../middlewares/auth')
 
 const passport = require('passport')
@@ -78,6 +79,12 @@ router.get('/wishlist', userAuth, wishlistController.getWishlist);
 router.post('/wishlist/add', userAuth, wishlistController.addToWishlist);
 router.delete('/wishlist/remove', userAuth, wishlistController.removeFromWishlist);
 
+//wallet
+router.get("/wallet",userAuth,checkoutController.getWallet);
+
+// Routes for applying and removing coupons 
+router.post('/coupon/apply',userAuth, couponController.applyCoupon);
+router.delete('/coupon/remove', userAuth,couponController.removeCoupon);
 
 
 

@@ -5,6 +5,7 @@ const customerControllers = require('../controllers/admin/customerControllers')
 const categoryControllers = require('../controllers/admin/categoryControllers')
 const productControllers = require('../controllers/admin/productControllers')
 const orderControllers = require('../controllers/admin/orderControllers')
+const couponController = require('../controllers/admin/couponController')
 const {adminAuth} = require('../middlewares/auth')
 const multer = require('multer');
 const storage = require('../helpers/multer')
@@ -46,6 +47,14 @@ router.post('/deleteImage',adminAuth,productControllers.deleteSingleImage)
 router.get('/orders',adminAuth, orderControllers.getOrderList);
 router.get('/orders/:orderId',adminAuth, orderControllers.getOrderDetails);
 router.post('/changeOrderStatus',adminAuth,orderControllers.changeOrderStatus)
+
+// Routes for creating and deleting coupons 
+router.get('/coupon' ,adminAuth,couponController.getCoupon)
+router.post('/coupon/create', adminAuth, couponController.createCoupon);
+router.put('/coupon/update/:couponId',adminAuth, couponController.updateCoupon);
+router.delete('/coupon/delete/:couponId', adminAuth, couponController.deleteCoupon);
+
+
 
 
 

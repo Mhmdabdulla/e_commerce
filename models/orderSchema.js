@@ -92,6 +92,11 @@ const orderSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  appliedCoupon: {
+    code: { type: String },
+    discountAmount: { type: Number, default: 0 }, // Stores discount value from the coupon
+    discountType: { type: String, enum: ["percentage", "amount"] }, // Tracks the type of discount
+  },
   cancellationReason: {
     type: String,
     default: "none",

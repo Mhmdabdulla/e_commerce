@@ -3,6 +3,8 @@ const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema')
 const User = require('../../models/userSchema')
 const Product = require('../../models/productSchema')
+const Wallet = require('../../models/walletSchema')
+const Coupon = require('../../models/couponSchema')
 // const Coupon = require('../models/coupon');
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -21,9 +23,10 @@ const getCheckoutPage = async (req, res) => {
         const cart = await Cart.findOne({ userId }).populate('items.productId');
         const addresses = await Address.find({ user:userId });
         const user = await User.findOne({_id:userId})
+        const coupons = await Coupon.find({isActive:true}); 
         
 
-        res.render('user/checkout', { cart, addresses ,user});
+        res.render('user/checkout', { cart, addresses ,user,coupons});
     } catch (error) {
         console.error("Error fetching checkout page data: ", error);
         res.status(500).send("Internal Server Error");
@@ -50,21 +53,29 @@ const placeOrder = async (req,res) =>{
             price: item.totalPrice
         }));
 
+
+            // Determine if a coupon is applied
+    const isCouponApplied = !!cart.appliedCoupon;
+    const appliedCoupon = isCouponApplied
+      ? {
+          code: cart.appliedCoupon.code,
+          discountAmount: cart.totalDiscount,
+          discountType: cart.appliedCoupon.discountType,
+        }
+      : null;
+
         if (paymentMethod === 'Cash on Delivery') {
-            
-     
-
-
-        const newOrder = new Order({
+            const newOrder = new Order({
             userId,
             orderedItems,
             totalPrice: cart.totalPrice,
-            finalAmount: cart.finalAmount,  // No discount in COD
+            finalAmount: cart.finalAmount,  
             discount : cart.totalDiscount,
             address: selectedAddress,
             status: 'Pending',
             paymentMethod: "COD",
-            couponApplied: false,  // Assuming coupon is not used in COD
+            couponApplied: isCouponApplied,
+            appliedCoupon: appliedCoupon, 
         });
 
         await newOrder.save();
@@ -72,7 +83,7 @@ const placeOrder = async (req,res) =>{
         const user = await User.findOne({_id:userId})
 
         // Clear the user's cart after placing order
-        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 ,appliedCoupon : { code: null, discountAmount: 0 }});
        // Send success response for COD to frontend
        return res.json({ success: true });
     } else if (paymentMethod === "Razorpay") {
@@ -94,12 +105,14 @@ const placeOrder = async (req,res) =>{
           status: "Pending",
           paymentMethod: "Razorpay",
           razorpayOrderId: razorpayOrder.id,
+          couponApplied: isCouponApplied,
+          appliedCoupon: appliedCoupon,
         });
   
         await newOrder.save();
 
         // Clear the user's cart after placing order
-        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 });
+        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 ,appliedCoupon : { code: null, discountAmount: 0 }});
         
         // Send the Razorpay order details to frontend
         return res.json({
@@ -177,6 +190,28 @@ const cancelOrReturn = async (req,res) => {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
+
+           // Check if payment was successful
+           if (order.paymentStatus === 'Completed') {
+            const refundAmount = order.finalAmount;
+
+            // Find the user's wallet
+            const user = await User.findById(order.userId).populate("wallet");
+            if (user && user.wallet) {
+                const wallet = await Wallet.findById(user.wallet._id);
+
+                // Update wallet balance and add transaction
+                wallet.balance += refundAmount;
+                wallet.transactions.push({
+                    type: "credit",
+                    amount: refundAmount,
+                    description: `Refund for ${action}ed order ${orderId}`,
+                    date: new Date(),
+                });
+                
+                await wallet.save(); // Save updated wallet
+            }
+        }
      
         
 
@@ -217,6 +252,26 @@ const orderSuccess = async(req,res) => {
     }
 }
 
+const getWallet = async (req, res) => {
+    try {
+        // Assuming user ID is stored in session
+        const userId = req.session.user;
+        const user = await User.findById(userId).populate("wallet");
+
+        if (!user || !user.wallet) {
+            return res.status(404).json({ message: "Wallet not found" });
+        }
+
+        res.render("user/wallet", {
+            user,
+            wallet: user.wallet
+        });
+    } catch (error) {
+        console.error("Error fetching wallet:", error);
+        res.status(500).json({ message: "Failed to retrieve wallet" });
+    }
+};
+
 
 
 module.exports = {
@@ -226,5 +281,6 @@ module.exports = {
     getOrderDetails,
     cancelOrReturn,
     verifyPayment,
-    orderSuccess
+    orderSuccess,
+    getWallet
 }
