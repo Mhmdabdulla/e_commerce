@@ -1,0 +1,195 @@
+<%- include("../partial/admin/header.ejs") %>
+<style>
+/* Ensure uniform button sizes and spacing */
+.btn-group .btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  width: auto;
+  margin: 0 5px;
+}
+
+@media (max-width: 768px) {
+  .text-end .btn-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+</style>
+<div class="content-header">
+  <div>
+      <h2 class="content-title card-title">Sales Report</h2>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <!-- Button Group for Download -->
+  <div class="text-end mb-3">
+    <div class="btn-group">
+      <button onclick="downloadReport('pdf')" class="btn btn-secondary">PDF</button>
+      <button onclick="downloadReport('excel')" class="btn btn-success">Excel</button>
+    </div>
+  </div>
+
+  <!-- Filter Row -->
+  <div class="row align-items-center mb-3">
+    <div class="col-lg-2 col-md-3 mb-2">
+      <input type="text" id="orderId" placeholder="Search by Invoice" class="form-control">
+    </div>
+    <div class="col-lg-2 col-md-2 mb-2">
+      <select id="periodFilter" class="form-control">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+    <div class="col-lg-2 col-md-2 mb-2">
+      <input type="date" id="startDate" class="form-control">
+    </div>
+    <div class="col-lg-2 col-md-2 mb-2">
+      <input type="date" id="endDate" class="form-control">
+    </div>
+  </div>
+  
+  <div id="reportContainer">
+    <% if (!reportData || !reportData.report) { %>
+      <p>No data available for the selected period.</p>
+    <% } else { %>
+    <!-- Summary Cards -->
+    <div class="row text-center mb-4">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5>Overall Order Amount</h5>
+            <p>₹<%= reportData.report.overallOrderAmount %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5>Overall Discount</h5>
+            <p>₹<%= reportData.report.overallDiscount %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5>Overall Sales Count</h5>
+            <p><%= reportData.report.overallSalesCount %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <table class="table table-responsive table-striped">
+      <thead>
+        <tr>
+          <th>Invoice No</th>
+          <th>Invoice Date</th>
+          <th>Items</th>
+          <th>Total Price</th>
+          <th>Total Discount</th>
+          <th>Status</th>
+          <th>Payment Method</th>
+          <th>Payment Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reportData.orderDetails.forEach(order => { %>
+          <tr>
+            <td><%= order.Invoice.invoiceNo %></td>
+            <td><%= new Date(order.invoice.invoiceDate).toLocaleDateString() %></td>
+            <td>
+              <% order.orderedItems.forEach(item => { %>
+                <p><%= item.product.productName %> (<%= item.quantity %>)</p>
+              <% }) %>
+            </td>
+            <td>₹<%= order.totalPrice %></td>
+            <td>₹<%= order.discount %></td>
+            <td><%= order.status %></td>
+            <td><%= order.paymentMethod %></td>
+            <td><%= order.paymentStatus %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <%}%>
+  </div>
+  <!--pagination start-->
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <button 
+      class="btn btn-primary" 
+      onclick="fetchPage('<%= reportData.currentPage - 1 %>')" 
+      <% if (reportData.currentPage <= 1) { %> disabled <% } %>>
+      Previous
+    </button>
+  
+    <span>Page <%= reportData.currentPage %> of <%= reportData.totalPages %></span>
+  
+    <button 
+      class="btn btn-primary" 
+      onclick="fetchPage('<%= reportData.currentPage + 1 %>')" 
+      <% if (reportData.currentPage >= reportData.totalPages) { %> disabled <% } %>>
+      Next
+    </button>
+  </div>
+  <!--pagination end-->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    let currentPage = 1;
+    // Function to fetch and update the report
+    function fetchReport() {
+      const filter = $('#periodFilter').val();
+      const startDate = $('#startDate').val();
+      const endDate = $('#endDate').val();
+      const orderId = $('#orderId').val();
+     
+      $.ajax({
+        url: '/admin/report', 
+        method: 'GET',
+        data: {
+          filter: filter,
+          startDate: startDate,
+          endDate: endDate,
+          orderId:orderId,
+          page : currentPage
+        },
+        success: function(data) {
+          // Update the report data in the DOM
+          $('#reportContainer').html(data);
+        },
+        error: function(error) {
+          console.error('Error fetching report:', error);
+        }
+      });
+    }
+
+    // Event listeners for input changes
+    $('#periodFilter, #startDate, #endDate ,#orderId').on('change', fetchReport);
+
+    function fetchPage(page) {
+    currentPage = page;
+    fetchReport();
+}
+  });
+
+  function downloadReport(type) {
+    const filter = document.getElementById("periodFilter").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+
+    const url = `/admin/download/${type}?filter=${filter}&startDate=${startDate}&endDate=${endDate}`;
+    window.location.href = url;
+  }
+</script>
+<%- include("../partial/admin/footer.ejs") %>

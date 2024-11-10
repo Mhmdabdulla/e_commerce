@@ -4,9 +4,30 @@ const Coupon = require('../../models/couponSchema');
 
 exports.getCoupon = async (req,res) => {
     try {
-        const coupons = await Coupon.find()
+        const search = req.query.search || '';
+        const page = req.query.page || 1;
+        const limit = 4;
 
-        res.render('admin/coupon',{coupons})
+        const coupons = await Coupon.find({
+            
+                code : {$regex:new RegExp(".*"+search+".*","i")}
+            
+        })
+        .limit(limit*1)
+        .skip((page-1)*limit)
+        .exec();
+
+        const count = await Coupon.find({
+            code : {$regex:new RegExp(".*"+search+".*","i")}
+        }).countDocuments();
+
+        res.render('admin/coupon',{
+            coupons,
+            currentPage : page,
+            totalPages : Math.ceil(count/limit)
+            
+            
+            })
     } catch (error) {
         console.log('Error coupon loading' , error)
     }
@@ -15,8 +36,8 @@ exports.getCoupon = async (req,res) => {
 // Create a new coupon
 exports.createCoupon = async (req, res) => {
     try {
-        const { code, discountAmount, discountType, expiryDate, minimumPrice } = req.body;
-        const newCoupon = new Coupon({ code, discountAmount, discountType, expiryDate, minimumPrice });
+        const { code, discountAmount, discountType, expiryDate, minimumPrice ,maximumPrice } = req.body;
+        const newCoupon = new Coupon({ code, discountAmount, discountType, expiryDate, minimumPrice,maximumPrice });
         await newCoupon.save();
         res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
     } catch (error) {

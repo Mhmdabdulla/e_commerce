@@ -3,8 +3,8 @@
 <style>
   /* Checkout Page Styles (No change) */
   .checkout-container {
-    padding: 3rem 0;
-    margin-top: 8rem;
+    padding:7rem 0;
+    
   }
   .checkout-row {
     display: flex;
@@ -23,12 +23,46 @@
   .checkout-right {
     width: 30%;
   }
+  .checkout-right h4 {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #757575;
+        margin-bottom: 20px;
+  }
+  .checkout-right .item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+  .checkout-right .item .value {
+        font-weight: bold;
+    }
+  .checkout-right .item .discount {
+        color: #388e3c;
+    }
+  .checkout-right .item .free {
+        color: #388e3c;
+    }
+  .checkout-right .total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+  .checkout-right .savings {
+        color: #388e3c;
+        font-size: 14px;
+        text-align: center;
+    }
   .coupon-section {
     margin: 20px 0; /* Spacing around the coupon section */
 }
 
-.coupon-section h3 {
-    font-size: 1.5rem; /* Heading size */
+.coupon-section h6 {
+    font-size: 1rem; /* Heading size */
     margin-bottom: 10px; /* Spacing below the heading */
     color: #333; /* Color of the heading */
 }
@@ -51,9 +85,9 @@
     margin-left: 10px; /* Spacing between the dropdown and button */
     border: none; /* Remove default border */
     border-radius: 4px; /* Rounded corners */
-    background-color: #28a745; /* Button color */
+    background-color: #f86e1e; /* Button color */
     color: white; /* Text color */
-    font-size: 1rem; /* Font size */
+    font-size: 0.7rem; /* Font size */
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.3s; /* Smooth transition for hover effect */
 }
@@ -90,7 +124,7 @@
     align-items: center;
   }
   .address-card button {
-    background-color: #007bff;
+    background-color: #4bea11;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -120,40 +154,18 @@
     margin-top: 20px;
   }
   .place-order-btn {
-    width: 100%;
-    padding: 15px;
-    background-color: #007bff;
+    margin-top: 1rem;
+    width: 50%;
+    padding: 8px;
+    background-color: #24b60ef5;
     color: white;
     border: none;
     border-radius: 5px;
-    font-size: 1.25rem;
+    font-size: 1rem;
     cursor: pointer;
   }
 
-    /* Styles for Ordered Items Section */
-    .ordered-items-section {
-    margin-top: 20px;
-  }
-  .ordered-item-card {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  .ordered-item-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    margin-right: 15px;
-  }
-  .ordered-item-details {
-    flex: 1;
-  }
-  .ordered-item-name {
-    font-weight: bold;
-  }
+
 </style>
 
 <div class="container checkout-container">
@@ -163,14 +175,14 @@
       <div class="checkout-left">
 <!-- Coupon Section -->
 <div class="coupon-section">
-  <h3>Select Coupon</h3>
+  <h6>Select Coupon</h6>
   <div class="coupon-input-group">
     <select id="couponSelect" class="coupon-select" <% if (cart.appliedCoupon && cart.appliedCoupon.code) { %> disabled <% } %>>
       <option value="">-- Select a Coupon --</option>
       <% coupons.forEach(coupon => { %>
         <option value="<%= coupon.code %>" 
           <%= cart.appliedCoupon && cart.appliedCoupon.code === coupon.code ? 'selected' : '' %>>
-          <%= coupon.code %> - <%= coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '$' + coupon.discountAmount %> off
+          <%= coupon.code %> - <%= coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '₹' + coupon.discountAmount %> off
         </option>
       <% }); %>
     </select>
@@ -183,15 +195,15 @@
 
         <!-- Address Section -->
         <div class="address-section">
-          <h4>Select Delivery Address</h4>
+          <h6>Select Delivery Address</h6>
 
           <% addresses.forEach(address => { %>
           <div class="address-card">
             <div>
-              <p>
-                <%= address.landMark %>, <%= address.city %>, <%=
-                address.pincode %>
-              </p>
+              <p><%=address.name%></p>
+              <p><%= address.landMark %>, <%= address.city %>,<%=address.state%>, <%=address.pincode %></p>
+              <p>Phone:<%=address.phone%></p>   
+              
             </div>
             <div>
               <button
@@ -229,19 +241,40 @@
         <!-- Order Summary -->
         <div class="order-summary">
 
-          <div>
-            <span>Price()</span>
-            <span>₹<%= cart.totalPrice %></span>
+          <div class="item">
+            <span>Price(<%= cart.items.length %> items)</span>
+            <span class="value">₹<%= cart.totalPrice %></span>
           </div>
+          <%if(cart.appliedCoupon && cart.appliedCoupon.code){%>
+          <div class="item">
+            <span>Coupon Discount</span>
+                <span class="value discount">– ₹<%= cart.appliedCoupon.discountAmount%></span>
+          </div>
+          <%}%>
+          <div class=" item">
+            <span>Total Discount</span>
+            <span class="value discount">– ₹<%= cart.totalDiscount %></span>
+        </div>
 
-          <div>
+          <div class="item">
             <span>Delivery Fee</span>
-            <span>₹<%= cart.shippingFee %></span>
+            <%if(cart.shippingFee == 0){%>
+            <span class="value free"> Free</span>
+            <%}else{%>
+                <span class="value ">₹<%= cart.shippingFee %> </span>
+            <%}%>
           </div>
-          <div>
-            <strong>Total Payable</strong>
-            <strong>₹<%= cart.finalAmount %></strong>
+          <div class="item">
+            <span>Tax</span>
+            <span class="value">0%</span>
           </div>
+          <hr>
+          <div class="total">
+            <span>Total  Payable</span>
+            <span>₹<%= cart.finalAmount %></span>
+          </div>
+          <hr>
+          <div class="savings">You will save ₹<%= cart.totalDiscount %> on this order</div>
         </div>
 
         <!-- Payment Methods -->
@@ -272,20 +305,7 @@
     </div>
   </form>
 
-          <!-- Ordered Items Section -->
-          <div class="ordered-items-section">
-            <h4>Ordered Items</h4>
-            <% cart.items.forEach(item => { %>
-            <div class="ordered-item-card">
-              <img src="uploads/re-images/<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="ordered-item-img" />
-              <div class="ordered-item-details">
-                <p class="ordered-item-name"><%= item.productId.productName %></p>
-                <p>Quantity: <%= item.quantity %></p>
-                <p>Price: ₹<%= item.totalPrice %></p>
-              </div>
-            </div>
-            <% }) %>
-          </div>
+
         </div>
 
   <!-- Add Address Modal -->
@@ -537,7 +557,8 @@
           $("#editAddressForm").attr("action", `/address/edit/${addressId}`);
         },
         error: function (err) {
-          alert("Failed to fetch address details.");
+          Swal.fire(data.message || 'Failed to fetch address details.', '', 'error');
+    
         },
       });
     });
@@ -667,10 +688,21 @@
 
       const result = await orderResponse.json();
       if (result.success) {
-        // Redirect to the order success page for COD
-        window.location.href = "/order-success";
+        Swal.fire({
+                    icon: "success",
+                    title: "Order Placed!",
+                    text: "Your order has been successfully placed with Cash on Delivery.",
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    window.location.href = "/order-success";
+                });
       } else {
-        alert(result.message || "Failed to place order with COD.");
+        Swal.fire({
+                    icon: "error",
+                    title: "Order Failed",
+                    text: result.message || "Failed to place order with Cash on Delivery.",
+                });
       }
     } else if (paymentMethod === "Razorpay") {
       // Fetch Razorpay order details if Razorpay is selected
@@ -701,9 +733,21 @@
 
           const result = await verificationResponse.json();
           if (result.success) {
-            window.location.href = "/order-success";
+            Swal.fire({
+                            icon: "success",
+                            title: "Payment Successful!",
+                            text: "Your payment has been successfully verified.",
+                            timer: 2000,
+                            showConfirmButton: false,
+                        }).then(() => {
+                            window.location.href = "/order-success";
+                        });
           } else {
-            alert("Payment verification failed!");
+            Swal.fire({
+                            icon: "error",
+                            title: "Payment Failed",
+                            text: "Payment verification failed. Please try again!",
+                        });
           }
         },
         theme: { color: "#3399cc" },

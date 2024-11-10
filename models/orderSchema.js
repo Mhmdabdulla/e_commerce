@@ -59,6 +59,7 @@ const orderSchema = new Schema({
     },
   invoiceDate: {
     type: Date,
+    default : Date.now
   }
 },
   status: {
@@ -80,7 +81,7 @@ const orderSchema = new Schema({
   razorpayPaymentId: String,
   paymentStatus: {
     type: String,
-    enum: ["Pending", "Completed"],
+    enum: ["Pending", "Completed","Failed" , "Refunded"],
     default: "Pending",
   },
   createdOn: {

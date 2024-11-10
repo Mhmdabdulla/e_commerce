@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 
 
@@ -22,21 +23,14 @@ const loadHomePage = async (req,res)=>{
             category : {$in:categories.map(category => category._id)},
            
 
-        })
+        }).populate("category" , "name")
         productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-        
-        
-        
-        if(user){
-            const userData = await User.findOne({_id:user})
-            res.render('user/home',{user:userData , products:productData})
-        }else{
-            return res.render('user/home',{products:productData})
-        }
+         
+        const userData = await User.findOne({_id:user}) || null
+         res.render('user/home',{user:userData , products:productData})
+  
 
-        
-        
-    } catch (error) {
+        } catch (error) {
         console.log('home page not found',error)
         res.status(500).send('server error when loading homepage')
     }
@@ -150,7 +144,10 @@ const signUp = async (req,res)=>{
         res.redirect('/pageNotFount')
     }
 }
-
+// Function to generate a random referral code
+const generateReferralCode = () => {
+    return crypto.randomBytes(3).toString('hex'); // Generates a 6-character hex string
+};
 
 //Verify OTP
 const verifyOtp = async function(req,res) {
@@ -166,8 +163,10 @@ const verifyOtp = async function(req,res) {
             // Add wallet ID to user details
              userDeatils.wallet = wallet._id;
 
-
-
+            // Generate a unique referral code
+             const referralCode = generateReferralCode();
+              userDeatils.referalCode = referralCode;
+console.log(userDeatils)
 
             const userData = new User(userDeatils);
 

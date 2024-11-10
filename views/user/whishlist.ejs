@@ -86,7 +86,7 @@
     }
 
     .wishlist-item .price {
-        color: #007bff;
+        color: #010810;
         font-weight: bold;
     }
 
@@ -133,14 +133,39 @@
                 <div class="sidebar">
                     <div class="text-center">
                         <img src="/admin-assets/imgs/people/avatar2.png" alt="Profile Picture" class="rounded-circle profile-img">
-                        <h2>Hello, <%= user.name %></h2>
+                        <h2>Hello, <%=user.name%></h2>
                     </div>
                     <ul class="list-unstyled">
-                        <li class="mb-3"><a href="/profile"><i class="fas fa-box me-2"></i> Dashboard</a></li>
-                        <li class="mb-3"><a href="/orders"><i class="fas fa-box me-2"></i> My Orders</a></li>
-                        <li class="mb-3"><a href="/address"><i class="fas fa-box me-2"></i> Addresses</a></li>
-                        <li class="mb-3"><a href="/cart"><i class="fas fa-shopping-cart me-2"></i> Cart</a></li>
-                        <li class="mb-3"><a href="/wishlist" class="active"><i class="fas fa-shopping-cart me-2"></i> Wishlist</a></li>
+                        <li class="mb-3">
+                            <a href="/profile" class="d-flex align-items-center ">
+                                <i class="fas fa-box me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/orders" class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/address" class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i> Addresses
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/cart" class="d-flex align-items-center">
+                                <i class="fas fa-shopping-cart me-2"></i> Cart
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href='/wishlist' class="d-flex align-items-center active">
+                                <i class="fas fa-shopping-cart me-2"></i> Whishlist
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href='/wallet' class="d-flex align-items-center">
+                                <i class="fas fa-shopping-cart me-2"></i> Wallet
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -157,11 +182,13 @@
                                 <div id="wishlist-item-<%= item.productId._id %>" class="wishlist-item">
                                     <img src="uploads/re-images/<%= item.productId.productImage[0] %>" alt="<%= item.productName %>">
                                     <div>
-                                        <h5><%= item.productId.productName %></h5>
+                                        <a class="d-block h5 mb-2" href="/productDetails?productId=<%= item.productId._id %>&categoryId=<%= item.productId.category %>">
+                                            <%= item.productId.productName %>
+                                        </a>
                                         <p class="price">₹<%= item.productId.salePrice.toFixed(2) %></p>
                                     </div>
                                     <div class="action-buttons">
-                                        <button class="btn-add-cart" onclick="addToCart('<%= item.productId._id %>')">Add to Cart</button>
+                                        <a href="#" class="add-to-cart-btn btn btn-primary rounded-pill m-3" data-product-id="<%= item.productId._id %>">Add to Cart</a>
                                         <a href="#" class="remove-link" onclick="removeFromWishlist('<%= item.productId._id %>')">
                                             <i class="fas fa-trash"></i>
                                         </a>
@@ -222,3 +249,43 @@
 }
 
 </script>
+
+<script>
+    // Add to Cart functionality with SweetAlert
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+          button.addEventListener('click', function(event) {
+              event.preventDefault();
+              const productId = this.getAttribute('data-product-id');
+              this.disabled = true;
+              fetch('/cart/add', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ productId, quantity: 1 })
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.message === 'Product added to cart successfully') {
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Added to Cart!',
+                          text: 'The product has been added to your cart.',
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+                      const cartCountElement = document.getElementById('cart-item-count');
+                      let currentCount = parseInt(cartCountElement.textContent) || 0;
+                      cartCountElement.textContent = currentCount + 1;
+                      cartCountElement.style.display = 'block';
+                  } else {
+                      Swal.fire({ icon: 'error', title: 'Error!', text: data.message || 'An error occurred while adding to cart.', showConfirmButton: false, timer: 2000 });
+                  }
+                  this.disabled = false;
+              })
+              .catch(error => {
+                  console.error(error);
+                  Swal.fire({ icon: 'error', title: 'Error!', text: 'An unexpected error occurred.', showConfirmButton: false, timer: 2000 });
+                  this.disabled = false;
+              });
+          });
+      });
+  </script>

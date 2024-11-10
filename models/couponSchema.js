@@ -28,6 +28,10 @@ const couponSchema = new Schema({
         type: Number,
         required: true
     },
+    maximumPrice: {
+        type: Number,
+        required: true
+    },
     isActive: {  // Changed from 'isList' to 'isActive'
         type: Boolean,
         default: true

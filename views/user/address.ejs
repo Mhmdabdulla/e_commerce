@@ -425,10 +425,7 @@
             event.preventDefault();
         }
     }
-</script>
 
-
-<script>
     // Handle Edit Address Button Click
     $(document).ready(function(){
         $('.edit-address-btn').on('click', function(){
@@ -450,7 +447,11 @@
                     $('#editAddressForm').attr('action', `/address/edit/${addressId}`);
                 },
                 error: function(err) {
-                    alert('Failed to fetch address details.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to fetch address details.',
+                    });
                 }
             });
         });

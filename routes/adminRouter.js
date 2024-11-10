@@ -6,6 +6,7 @@ const categoryControllers = require('../controllers/admin/categoryControllers')
 const productControllers = require('../controllers/admin/productControllers')
 const orderControllers = require('../controllers/admin/orderControllers')
 const couponController = require('../controllers/admin/couponController')
+const salesReportController = require('../controllers/admin/salesReportController')
 const {adminAuth} = require('../middlewares/auth')
 const multer = require('multer');
 const storage = require('../helpers/multer')
@@ -53,6 +54,11 @@ router.get('/coupon' ,adminAuth,couponController.getCoupon)
 router.post('/coupon/create', adminAuth, couponController.createCoupon);
 router.put('/coupon/update/:couponId',adminAuth, couponController.updateCoupon);
 router.delete('/coupon/delete/:couponId', adminAuth, couponController.deleteCoupon);
+
+//sales report
+router.get('/report',salesReportController.getSalesReport)
+router.get("/download/pdf", salesReportController.downloadPDF)
+router.get("/download/excel" , salesReportController.downloadExcel)
 
 
 

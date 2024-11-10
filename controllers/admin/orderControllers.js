@@ -5,13 +5,29 @@ const Order = require('../../models/orderSchema')
 
 const getOrderList = async (req, res) => {
     try {
-        const orders = await Order.find()
+        const search = req.query.search || '';
+        const page = req.query.page || 1;
+        const limit = 4;
+
+        const orders = await Order.find({
+            orderId : {$regex:new RegExp(".*"+search+".*","i")}
+        })
             .populate('userId')
             .populate('orderedItems.product')
-            .sort({ createdOn: -1 }); // Sorting by latest orders
-            console.log(orders)
+            .sort({ createdOn: -1 }) // Sorting by latest orders
+            .limit(limit*1)
+            .skip((page-1)*limit)
+            .exec();
+        
+            const count = await Order.find({
+                orderId : {$regex:new RegExp(".*"+search+".*","i")}
+            }).countDocuments();
 
-        res.render('admin/order-list', { orders });
+        res.render('admin/order-list', {
+             orders,
+             currentPage : page,
+            totalPages : Math.ceil(count/limit)
+             });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');

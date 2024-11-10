@@ -1,5 +1,6 @@
 const Cart = require('../../models/cartSchema')
 const Coupon = require('../../models/couponSchema')
+const User = require('../../models/userSchema')
 
 exports.applyCoupon = async (req, res) => {
     try {
@@ -11,6 +12,11 @@ exports.applyCoupon = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
+                // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User  not found' });
+        }
 
         // Find the coupon by code
         const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
@@ -18,10 +24,22 @@ exports.applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid or inactive coupon' });
         }
 
-        // Check if the cart meets the minimum price requirement for the coupon
-        if (cart.totalPrice < coupon.minimumPrice) {
-            return res.status(400).json({ success: false, message: `Minimum price of ${coupon.minimumPrice} required to apply this coupon.` });
+        // Check if the coupon has already been used by the user
+        if (user.usedCoupons.includes(coupon._id)) {
+            return res.status(400).json({ success: false, message: 'Coupon has already been used' });
         }
+
+
+        // Check if the cart meets the minimum price requirement for the coupon
+        if (cart.totalPrice < coupon.minimumPrice || cart.totalPrice > coupon.maximumPrice) {
+            return res.status(400).json({ success: false, message: `This coupon only applicable between ${coupon.minimumPrice} and ${coupon.maximumPrice}.` });
+        }
+
+         // Check if the coupon is expired
+         const currentDate = new Date();
+         if (currentDate > coupon.expiryDate) {
+             return res.status(400).json({ success: false, message: 'Coupon has expired' });
+         }
 
         // Calculate the discount based on the coupon type
         let discount = 0;
@@ -43,6 +61,10 @@ exports.applyCoupon = async (req, res) => {
 
         // Save the updated cart
         await cart.save();
+
+                // Mark the coupon as used by the user
+                user.usedCoupons.push(coupon._id);
+                await user.save();
 
         res.json({ success: true, message: 'Coupon applied successfully!', cart });
     } catch (error) {

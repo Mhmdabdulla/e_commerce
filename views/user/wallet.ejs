@@ -65,7 +65,7 @@
 
     .content .balance {
         font-size: 1.5rem;
-        color: #007bff;
+        color: #f18f0e;
         margin-bottom: 20px;
     }
 
@@ -83,7 +83,7 @@
     }
 
     .transaction-table th {
-        background-color: #007bff;
+        background-color: #00c760;
         color: #fff;
     }
 
@@ -106,15 +106,39 @@
                 <div class="sidebar">
                     <div class="text-center">
                         <img src="/admin-assets/imgs/people/avatar2.png" alt="Profile Picture" class="rounded-circle profile-img">
-                        <h2>Hello, <%= user.name %></h2>
+                        <h2>Hello, <%=user.name%></h2>
                     </div>
                     <ul class="list-unstyled">
-                        <li class="mb-3"><a href="/profile"><i class="fas fa-box me-2"></i> Dashboard</a></li>
-                        <li class="mb-3"><a href="/orders"><i class="fas fa-box me-2"></i> My Orders</a></li>
-                        <li class="mb-3"><a href="/address"><i class="fas fa-box me-2"></i> Addresses</a></li>
-                        <li class="mb-3"><a href="/cart"><i class="fas fa-shopping-cart me-2"></i> Cart</a></li>
-                        <li class="mb-3"><a href="/wishlist" ><i class="fas fa-shopping-cart me-2"></i> Wishlist</a></li>
-                        <li class="mb-3"><a href="/wallet" class="active"><i class="fas fa-wallet me-2"></i> Wallet</a></li>
+                        <li class="mb-3">
+                            <a href="/profile" class="d-flex align-items-center ">
+                                <i class="fas fa-box me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/orders" class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/address" class="d-flex align-items-center">
+                                <i class="fas fa-box me-2"></i> Addresses
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href="/cart" class="d-flex align-items-center">
+                                <i class="fas fa-shopping-cart me-2"></i> Cart
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href='/wishlist' class="d-flex align-items-center">
+                                <i class="fas fa-shopping-cart me-2"></i> Whishlist
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <a href='/wallet' class="d-flex align-items-center active">
+                                <i class="fas fa-shopping-cart me-2"></i> Wallet
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -124,7 +148,7 @@
              <div class="col-lg-9 col-md-8">
                 <div class="content">
                     <h3>My Wallet</h3>
-                    <div class="balance">Current Balance: $<%= wallet.balance.toFixed(2) %></div>
+                    <div class="balance">Current Balance: ₹<%= wallet.balance.toFixed(2) %></div>
 
                     <!-- Filter Dropdown -->
                     <select id="transaction-filter" class="filter-dropdown form-select" onchange="filterTransactions()">
@@ -148,7 +172,7 @@
                                 <tr class="transaction-row" data-type="<%= transaction.type %>">
                                     <td><%= new Date(transaction.date).toLocaleDateString() %></td>
                                     <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
-                                    <td>$<%= transaction.amount.toFixed(2) %></td>
+                                    <td>₹<%= transaction.amount.toFixed(2) %></td>
                                     <td><%= transaction.description %></td>
                                 </tr>
                             <% }) %>

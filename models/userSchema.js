@@ -37,28 +37,19 @@ const userSchema = new Schema({
         type: Boolean,
         default:false
     },
-    cart: [{
-        type: Schema.Types.ObjectId,
-        ref:"Cart",
-    }],
     wallet: {
         type: Schema.Types.ObjectId,
         ref: "Wallet",
     },
-    wishlist:[{
-        type:Schema.Types.ObjectId,
-        ref:"Wishlist"
-    }],
-    orderHistory:[{
-        type:Schema.Types.ObjectId,
-        ref:"Order"
-    }],
+
+
     createdOn : {
         type:Date,
         default:Date.now,
     },
     referalCode:{
-        type:String
+        type:String,
+        unique : true
     },
     redeemed:{
         type:Boolean
@@ -67,20 +58,11 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref:"User"
     }],
-    searchHistory: [{
-        category: {
-            type: Schema.Types.ObjectId,
-            ref:"Category",
-        },
-        brand: {
-            type : String
-        },
-        searchOn : {
-            type: Date,
-            default: Date.now
-        }
+    usedCoupons: [{ // field to track used coupons
+        type: Schema.Types.ObjectId,
+        ref: "Coupon"
     }]
-   
+
 })
 
 
