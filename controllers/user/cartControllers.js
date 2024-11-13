@@ -4,10 +4,9 @@ const User = require('../../models/userSchema')
 const  {calculateCartTotals} = require('../../helpers/cart')
 
 
-const listCart = async (req, res) => {
+const listCart = async (req, res,next) => {
     const userId = req.session.user;
-    const user = User.find({userId})
-
+    const user = await User.findById(userId)
     try {
         const cart = await Cart.findOne({ userId }).populate('items.productId');
         
@@ -18,13 +17,13 @@ const listCart = async (req, res) => {
         });
     } catch (error) {
         console.log('Cart error:',error)
-        return res.redirect('/pageNotFound')
+        next(error)
     }
 };
 
 
 // Add to Cart
-const addToCart = async (req, res) => {
+const addToCart = async (req, res,next) => {
     const userId = req.session.user; 
     const { productId, quantity } = req.body; 
 
@@ -102,12 +101,12 @@ const addToCart = async (req, res) => {
         return res.status(200).json({success:true, message: 'Product added to cart successfully' });
     } catch (error) {
         console.error('Error when adding to cart:', error);
-        return res.status(500).json({success:false, message: 'Server error' });
+        next(error)
     }
 };
 
 //cart item number on icon 
-const cartItemCount = async (req,res) =>{
+const cartItemCount = async (req,res,next) =>{
     try {
         const userId = req.session.user; 
         const cart = await Cart.findOne({ userId });
@@ -116,12 +115,12 @@ const cartItemCount = async (req,res) =>{
         res.json({ cartItemCount });
     } catch (error) {
         console.error('Error fetching cart item count:', error);
-        res.status(500).json({ error: 'Failed to fetch cart item count' });
+        next(error)
     }
 }
 
 //updat cart quantity
-const updateCartQuantity = async (req, res) => {
+const updateCartQuantity = async (req, res,next) => {
     const userId = req.session.user;
     const { productId, action } = req.body;
 
@@ -164,13 +163,13 @@ const updateCartQuantity = async (req, res) => {
         return res.status(200).json({success:true, message: 'Cart updated successfully',newTotalPrice: productItem.totalPrice });
     } catch (error) {
         console.log('Error when updating cart quantity', error);
-        return res.status(500).json({success:false, message: 'Server error' });
+        next(error)
     }
 };
 
 
 //remove product from cart
-const removeFromCart = async (req, res) => {
+const removeFromCart = async (req, res,next) => {
     const userId = req.session.user;
     const { productId } = req.body;
 
@@ -203,7 +202,7 @@ const removeFromCart = async (req, res) => {
         return res.status(200).json({success:true, message: 'Product removed from cart successfully', cart });
     } catch (error) {
         console.error('Error removing product from cart:', error);
-        return res.status(500).json({success:false, message: 'Server error' });
+        next(error)
     }
 };
 

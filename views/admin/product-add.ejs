@@ -80,11 +80,11 @@
                                         <input placeholder="₹" name="regularPrice" type="text" class="form-control border">
                                         <div id="regularPrice-error" class="error-message"></div>
                                     </div>
-                                    <div class="col-lg-4 mb-4">
+                                    <!-- <div class="col-lg-4 mb-4">
                                         <label class="form-label">Sale Price</label>
                                         <input placeholder="₹" name="salePrice" type="text" class="form-control border">
                                         <div id="salePrice-error" class="error-message"></div>
-                                    </div>
+                                    </div> -->
                                     <div class="col-lg-4 mb-4">
                                         <label class="form-label">Quantity</label>
                                         <input placeholder="" name="quantity" type="text" class="form-control border">
@@ -315,7 +315,7 @@
             const name = document.getElementsByName('productName')[0].value.trim();
             const description = document.getElementById('descriptionid').value.trim();
             const price = document.getElementsByName('regularPrice')[0].value.trim();
-            const saleprice = document.getElementsByName('salePrice')[0].value.trim();
+            // const saleprice = document.getElementsByName('salePrice')[0].value.trim();
             const category = document.getElementsByName('category')[0].value;
             const quantity = parseInt(document.getElementsByName('quantity')[0].value.trim(), 10);
             // const images = document.getElementById('input1').files;
@@ -355,16 +355,16 @@
             }
 
             // Validate Sale Price
-            if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
+            // if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+            //     displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+            //     isValid = false;
+            // }
 
             // Validate Price Relationship
-            if (parseFloat(price) < parseFloat(saleprice)) {
-                displayErrorMessage('regularPrice-error', 'Regular price must be greater than or equal to sale price.');
-                isValid = false;
-            }
+            // if (parseFloat(price) < parseFloat(saleprice)) {
+            //     displayErrorMessage('regularPrice-error', 'Regular price must be greater than or equal to sale price.');
+            //     isValid = false;
+            // }
 
             // Validate Category
             if (category === "") {

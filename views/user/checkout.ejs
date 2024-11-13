@@ -756,6 +756,34 @@
       const rzp = new Razorpay(options);
       rzp.open();
     }
+    //order using wallet payment
+    else if (paymentMethod === "Wallet") {
+        // Handle Wallet payment
+        const orderResponse = await fetch("/checkout/place-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentMethod, selectedAddress })
+        });
+
+        const result = await orderResponse.json();
+        if (result.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Order Placed!",
+                text: "Your order has been successfully placed using Wallet.",
+                timer: 2000,
+                showConfirmButton: false,
+            }).then(() => {
+                window.location.href = "/order-success";
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Order Failed",
+                text: result.message || "Failed to place order using Wallet.",
+            });
+        }
+    }
   };
 </script>
 

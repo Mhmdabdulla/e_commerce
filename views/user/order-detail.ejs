@@ -27,7 +27,27 @@
                             <h5 class="card-title"><%= item.product.productName %></h5>
                             <p class="card-text">Quantity: <%= item.quantity %></p>
                             <p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
+                            <p class="card-text text-danger"><%=item.status%></p>
                         </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center justify-content-end" style="padding-right: 22px;">
+                        <%if(item.status == 'Cancelled' || item.status == "Cancel Request" || item.status == "Return Request"   || item.status == "Returned"){%>
+                            <p >
+                                <i class="fas fa-circle" style="color: red;">
+                                </i>
+                                <%=item.status%>
+                               </p>
+                        <%}else{%>
+                            <%if(item.status =="Delivered" ){%>
+                            
+                                <button class="btn btn-warning" onclick="location.href='/orders/<%= order.orderId %>/return-item?productId=<%= item.product._id %>'">Return Item</button> 
+                            <%}else{%>
+                                <button class="btn btn-danger" onclick="location.href='/orders/<%= order.orderId %>/cancel-item?productId=<%= item.product._id %>'">Cancel Item</button>
+                            <%}%>
+
+                           
+                        <%}%>
+                        
                     </div>
                 </div>
             </div>
@@ -45,12 +65,12 @@
     </div>
 
     <!-- Order Actions -->
-    <% if (order.status !== 'Returned' && order.status !== 'Cancelled' && order.status !== 'Return Request') { %>
+    <% if (order.status !== 'Returned' && order.status !== 'Cancelled' && order.status !== 'Return Request' && order.status !== 'Cancel Request') { %>
     <div class="order-actions mt-4 d-flex gap-3">
         <% if (order.status === 'Delivered') { %>
-            <button class="btn btn-primary" onclick="showReturnForm()">Return Order</button>
+            <button class="btn btn-primary" onclick="showReturnForm()">Request Return</button>
         <% } else { %>
-            <button class="btn btn-primary" onclick="showCancelForm()">Cancel Order</button>
+            <button class="btn btn-primary" onclick="showCancelForm()">Request Cancel</button>
         <% } %>
         
     </div>
@@ -73,6 +93,7 @@
 
 
 <script>
+
 function showCancelForm() {
     document.getElementById('reasonForm').style.display = 'block';
 }
@@ -108,7 +129,7 @@ function submitReason(orderId, action) {
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
-                text: `Order ${action}ed successfully`,
+                text: `Order ${action}ed requested successfully`,
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {

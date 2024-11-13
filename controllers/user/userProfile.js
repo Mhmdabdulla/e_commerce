@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 
 
 
-const loadProfile = async (req,res)=>{
+const loadProfile = async (req,res,next)=>{
     try {
         const userId = req.session.user
         const userData = await User.findOne({_id:userId})
@@ -12,10 +12,11 @@ const loadProfile = async (req,res)=>{
         res.render('user/user-profile',{user:userData})
     } catch (error) {
         console.log('error loading profile :' ,  error)
+        next(error)
     }
 }
 
-const loadAddress = async (req,res) =>{
+const loadAddress = async (req,res,next) =>{
     try {
         const userId = req.session.user
         const userData = await User.findOne({_id:userId})
@@ -25,11 +26,11 @@ const loadAddress = async (req,res) =>{
         
     } catch (error) {
         console.log('error loading address : ',error)
-        res.redirect('/profile')
+        next(error)
     }
 }
 
-const getSingleAddress = async (req,res) => {
+const getSingleAddress = async (req,res,next) => {
     try {
         const userId = req.session.user
         const address = await Address.findOne({_id:req.params.id,user:userId})
@@ -41,11 +42,11 @@ const getSingleAddress = async (req,res) => {
         
     } catch (error) {
         console.error(error)
-        res.status(500).json({ error: 'Server error' });
+        next(error)
     }
 }
 
-const addAddress = async (req,res)=>{
+const addAddress = async (req,res,next)=>{
     const { name, city, landMark, state, pincode, phone, altPhone } = req.body;
     try {
         const userId = req.session.user
@@ -64,11 +65,11 @@ const addAddress = async (req,res)=>{
 
     } catch (error) {
         console.error(error)
-        res.redirect('/address')
+        next(error)
     }
 }
 
-const editAddress = async (req,res) => {
+const editAddress = async (req,res,next) => {
     const { name, city, landMark, state, pincode, phone, altPhone } = req.body;
     try {
         const userId = req.session.user
@@ -79,22 +80,22 @@ const editAddress = async (req,res) => {
         res.redirect('/address');
     } catch (error) {
         console.error(error)
-        res.redirect('/address')
+        next(error)
     }
 }
 
-const deleteAddress = async (req,res) => {
+const deleteAddress = async (req,res,next) => {
     try {
         const userId = req.session.user
         await Address.findOneAndDelete({ _id: req.params.id, user: userId });
         res.redirect('/address');
     } catch (error) {
-        console.error(error)
-        res.redirect('/address')
+        console.error('Error in deleteAddress',error)
+        next(error)
     }
 }
 
-const updateProfile = async (req,res) => {
+const updateProfile = async (req,res,next) => {
     try {
         const userId = req.session.user
         const { name, email, phone } = req.body;
@@ -112,13 +113,12 @@ const updateProfile = async (req,res) => {
         res.redirect('/profile');
 
     } catch (error) {
-        console.error(error);
-        req.flash('error', 'An error occurred while updating your profile.');
-        res.redirect('/profile');
+        console.error('Error in updateProfile',error);
+        next(error)
     }
 }
 
-const changePassword = async (req,res) => {
+const changePassword = async (req,res,next) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const userId = req.session.user;
@@ -159,9 +159,8 @@ const changePassword = async (req,res) => {
                 res.redirect('/profile');
         
     } catch (error) {
-        console.error(error);
-        req.flash('error', 'An error occurred while changing your password.');
-        res.redirect('/profile');
+        console.error('Error in changePassword',error);
+        next(error)
     }
 }
 

@@ -62,8 +62,8 @@ async function generateSalesReport(filter = "daily", startDate, endDate ,orderId
     // Count total documents
     const totalCount = await Order.countDocuments(matchStage);
 
-  console.log('Order details from generateSalesRepor()',orderDetails)
-  console.log('reports from generateSalesRepor()',report)
+  // console.log('Order details from generateSalesRepor()',orderDetails)
+  // console.log('reports from generateSalesRepor()',report)
     return {
       report: report[0],
       orderDetails,
@@ -144,7 +144,7 @@ async function generateSalesReport(filter = "daily", startDate, endDate ,orderId
   };
   
 
-  const getSalesReport = async (req, res) => {
+  const getSalesReport = async (req, res,next) => {
     try {
         const { filter, startDate, endDate ,orderId ,page = 1, limit = 10  } = req.query;
         const reportData = await generateSalesReport(filter, startDate, endDate ,orderId ,parseInt(page), parseInt(limit));
@@ -156,31 +156,35 @@ async function generateSalesReport(filter = "daily", startDate, endDate ,orderId
           return; // Exit the function
       }
         // Otherwise, render the full page
+     
         res.render("admin/sales-report", { reportData });
+   
     } catch (error) {
         console.error('Error generating sales report', error);
-        res.redirect('/pageerror');
+        next(error)
+        
     }
 };
-const downloadPDF = async (req,res) => {
+const downloadPDF = async (req,res,next) => {
     try {
         const { filter, startDate, endDate } = req.query;
         generatePDFReport(filter, startDate, endDate, res);
 
     } catch (error) {
         console.error('Error downloading PDF' , error)
-        res.redirect('/pageerror')
+        next(error)
+        
     }
 }
 
-const downloadExcel = async (req,res) => {
+const downloadExcel = async (req,res,next) => {
     try {
         const { filter, startDate, endDate } = req.query;
         generateExcelReport(filter, startDate, endDate, res);
         
     } catch (error) {
         console.error('Error downloading excel',error)
-        res.redirect('/pageerror')
+       next(error)
     }
 }
 

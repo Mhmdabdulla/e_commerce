@@ -54,7 +54,7 @@
       <input type="date" id="endDate" class="form-control">
     </div>
   </div>
-  
+
   <div id="reportContainer">
     <% if (!reportData || !reportData.report) { %>
       <p>No data available for the selected period.</p>
@@ -104,7 +104,7 @@
       <tbody>
         <% reportData.orderDetails.forEach(order => { %>
           <tr>
-            <td><%= order.Invoice.invoiceNo %></td>
+            <td><%= order.invoice.invoiceNo %></td>
             <td><%= new Date(order.invoice.invoiceDate).toLocaleDateString() %></td>
             <td>
               <% order.orderedItems.forEach(item => { %>

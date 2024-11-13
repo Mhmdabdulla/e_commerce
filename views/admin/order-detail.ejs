@@ -87,8 +87,31 @@
                             <h5 class="card-title"><%= item.product.productName %></h5>
                             <p class="card-text">Quantity: <%= item.quantity %></p>
                             <p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
+
+                            <div>
+                                <!-- Status Change Dropdown for Each Product -->
+                                <% if (item.status == 'Return Request' || item.status == 'Cancel Request') { %>
+                                    <label for="itemStatus<%= item.product._id %>">Change Item Status</label>
+                                    <select class="form-control bg-info text-white" id="itemStatus<%= item.product._id %>" 
+                                            style="border: 2px solid #007bff; border-radius: 5px;" 
+                                            onchange="changeItemStatus('<%= order.orderId %>', '<%= item.product._id %>', this.value)">
+                                            <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Verify Cancel</option>
+                                            <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Verify Return</option>
+
+                                    </select>
+                                <% } else { %>
+                                    <label>Item Status: 
+                                        <% const badgeClass = item.status === 'Cancelled' ? 'bg-danger' : 'bg-warning'; %>
+                                        <span class="badge <%= badgeClass %> text-white">
+                                        <%= item.status %>
+                                        </span>
+                                    </label>
+                                <% } %>
+                            </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         <% }) %>
@@ -115,6 +138,29 @@
             error: function(error) {
                 console.error('Error updating order status:', error);
                 Swal.fire('Error', 'Failed to update order status', 'error');
+            }
+        });
+    }
+</script>
+
+<script>
+    function changeItemStatus(orderId, productId, status) {
+        $.ajax({
+            url: '/admin/changeItemStatus',
+            method: 'POST',
+            data: {
+                orderId,
+                productId,
+                status
+            },
+            success: function(response) {
+                Swal.fire('Success', 'Item status updated!', 'success').then(() => {
+                    location.reload();
+                });
+            },
+            error: function(error) {
+                console.error('Error updating item status:', error);
+                Swal.fire('Error', 'Failed to update item status', 'error');
             }
         });
     }

@@ -28,10 +28,37 @@ const orderSchema = new Schema({
         type: Number,
         default: 0,
       },
+
       status: {
         type: String,
-        default: "placed",
+        enum: [
+          "Pending",
+          "Processing",
+          "Shipped",
+          "Delivered",
+          "Cancel Request",
+          "Cancelled",
+          "Return Request",
+          "Returned",
+        ],
+        default: "Pending",
       },
+      cancellationReason: {
+        type: String,
+        default: "none",
+      },
+      returnReason: {
+        type: String,
+        default: "none",
+      },
+      cancelQuantity:{
+        type:Number,
+        default:0
+      },
+      returnQuantity:{
+        type:Number,
+        default:0
+      }
     },
   ],
   totalPrice: {
@@ -70,6 +97,7 @@ const orderSchema = new Schema({
       "Processing",
       "Shipped",
       "Delivered",
+      "Cancel Request",
       "Cancelled",
       "Return Request",
       "Returned",

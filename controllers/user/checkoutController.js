@@ -8,6 +8,7 @@ const Coupon = require('../../models/couponSchema')
 // const Coupon = require('../models/coupon');
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { error } = require('console');
 const env = require('dotenv').config();
 
 // Initialize Razorpay instance with credentials
@@ -17,7 +18,7 @@ const razorpay = new Razorpay({
 });
 
 
-const getCheckoutPage = async (req, res) => {
+const getCheckoutPage = async (req, res,next) => {
     try {
         const userId = req.session.user;  
         const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -29,13 +30,13 @@ const getCheckoutPage = async (req, res) => {
         res.render('user/checkout', { cart, addresses ,user,coupons});
     } catch (error) {
         console.error("Error fetching checkout page data: ", error);
-        res.status(500).send("Internal Server Error");
+        next(error)
     }
 
 
 }
 
-const placeOrder = async (req,res) =>{
+const placeOrder = async (req,res,next) =>{
     try {
         const { selectedAddress, paymentMethod } = req.body;
 
@@ -86,7 +87,70 @@ const placeOrder = async (req,res) =>{
         await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 ,appliedCoupon : { code: null, discountAmount: 0 }});
        // Send success response for COD to frontend
        return res.json({ success: true });
-    } else if (paymentMethod === "Razorpay") {
+    }
+
+    //wallet payment 
+    else if (paymentMethod === "Wallet") {
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user || !user.wallet) {
+            return res.status(404).json({ success: false, message: "User  or wallet not found" });
+        }
+
+        // Check if the user has enough balance in the wallet
+        if (!user.wallet) {
+            return res.status(404).json({ success: false, message: "Wallet not found" });
+        }
+
+        const wallet = await Wallet.findById(user.wallet);
+        if (!wallet) {
+            return res.status(404).json({ success: false, message: "Wallet not found" });
+        }
+
+        if (wallet.balance < cart.finalAmount) {
+            return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
+        }
+
+        // Deduct the amount from the user's wallet
+        wallet.balance -= cart.finalAmount;
+
+        // Create a transaction record
+        wallet.transactions.push({
+            type: "debit",
+            amount: cart.finalAmount,
+            description: "Order payment",
+            date: new Date(),
+        });
+
+        // Save the updated wallet
+        await wallet.save();
+
+        // Create the order
+        const newOrder = new Order({
+            userId,
+            orderedItems,
+            totalPrice: cart.totalPrice,
+            finalAmount: cart.finalAmount,
+            discount: cart.totalDiscount,
+            address: selectedAddress,
+            status: "Pending",
+            paymentMethod: "Wallet",
+            paymentStatus : "Completed",
+            couponApplied: isCouponApplied,
+            appliedCoupon: appliedCoupon,
+        });
+
+        await newOrder.save();
+
+        // Clear the user's cart after placing order
+        await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0, appliedCoupon: { code: null, discountAmount: 0 } });
+        
+        return res.json({ success: true });
+    }
+    
+    
+    //Razerpay payment
+    else if (paymentMethod === "Razorpay") {
         // Create Razorpay order
         const razorpayOrder = await razorpay.orders.create({
           amount: cart.finalAmount * 100, // Amount in smallest currency unit (paise)
@@ -104,6 +168,7 @@ const placeOrder = async (req,res) =>{
           address: selectedAddress,
           status: "Pending",
           paymentMethod: "Razorpay",
+          paymentStatus : "Completed",
           razorpayOrderId: razorpayOrder.id,
           couponApplied: isCouponApplied,
           appliedCoupon: appliedCoupon,
@@ -124,13 +189,16 @@ const placeOrder = async (req,res) =>{
       }
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+        console.error("Error in place order",err);
+        next(error)
     }
 };
 
 //verify payment
-const verifyPayment = async (req, res) => {
+const verifyPayment = async (req, res,next) => {
+    try {
+        
+
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
   
     const generatedSignature = crypto
@@ -148,21 +216,27 @@ const verifyPayment = async (req, res) => {
     } else {
       return res.json({ success: false });
     }
+} catch (error) {
+    console.log('Error in verifyPayment',error)
+    next(error)
+        
+}
   };
 
-const getOrders = async (req, res) => {
+const getOrders = async (req, res,next) => {
     try {
         const orders = await Order.find({ userId: req.session.user}).populate('orderedItems.product').sort({createdOn : -1}); // Assuming each order has items with product references
         const user = await User.findOne({_id:req.session.user})
         res.render('user/orders', { orders,user });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
+        console.error('Error in getOrders',err);
+        next(err)
     }
 };
 
-const getOrderDetails = async (req,res) =>{
+const getOrderDetails = async (req,res,next) =>{
     try {
+        const user = await User.findById(req.session.user)
         const orderId = req.params.orderId;
      
         
@@ -173,14 +247,14 @@ const getOrderDetails = async (req,res) =>{
         }
         
 
-        res.render('user/order-detail', { order });
+        res.render('user/order-detail', { order,user });
     } catch (error) {
-        console.error(error);
-        res.status(500).redirect('/pageNotFound');
+        console.error('Error in getOrderDetails',error);
+        next(error)
     }
 }
 
-const cancelOrReturn = async (req,res) => {
+const cancelOrReturn = async (req,res,next) => {
     const { orderId, action } = req.params;
     const { reason } = req.body;
 
@@ -191,68 +265,194 @@ const cancelOrReturn = async (req,res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-           // Check if payment was successful
-           if (order.paymentStatus === 'Completed') {
-            const refundAmount = order.finalAmount;
-
-            // Find the user's wallet
-            const user = await User.findById(order.userId).populate("wallet");
-            if (user && user.wallet) {
-                const wallet = await Wallet.findById(user.wallet._id);
-
-                // Update wallet balance and add transaction
-                wallet.balance += refundAmount;
-                wallet.transactions.push({
-                    type: "credit",
-                    amount: refundAmount,
-                    description: `Refund for ${action}ed order ${orderId}`,
-                    date: new Date(),
-                });
-                
-                await wallet.save(); // Save updated wallet
-            }
-        }
-     
-        
-
+       
         if (action === 'cancel') {
-            order.status = 'Cancelled';
+            order.status = 'Cancel Request';
             order.cancellationReason = reason;
         } else if (action === 'return') {
             order.status = 'Return Request';
             order.returnReason = reason;
         }
 
-        // Update stock for each product in the order
-        for (let item of order.orderedItems) {
-            const product = await Product.findById(item.product);
-
-            if (product) {
-                product.stock += item.quantity; // Increment stock by the quantity ordered
-                await product.save(); // Save the updated product
-            }
-        }
-        
-
         await order.save();
-        res.status(200).json({ message: `Order ${action}ed successfully` });
+        res.status(200).json({ message: `Order ${action} Requested successfully` });
     } catch (error) {
-        res.status(500).json({ message: 'Error processing your request', error });
-        console.log(error)
+        console.log('Error in canceOrReturn',error)
+        next(error)
     }
 }
 
-const orderSuccess = async(req,res) => {
+const orderSuccess = async(req,res,next) => {
     try {
         res.render('user/order-success')
         
     } catch (error) {
         console.log('Error order success',error)
-        res.redirect('/pageNotFound')
+        next(error)
     }
 }
 
-const getWallet = async (req, res) => {
+//return or cancel individual item from order details
+const cancelSingleItem =  async (req, res,next) => {
+
+    try {
+        const { orderId } = req.params;
+        const { productId, reason, quantity } = req.body;
+        
+        const order = await Order.findOne({orderId:orderId});
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+                 // Find the specific item in orderedItems
+    const item = order.orderedItems.find(item => 
+        item.product.toString() === productId 
+    );
+    if (!item) {
+        return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+        
+
+
+        item.status = "Cancel Request";
+        item.cancelReason = reason;
+        item.cancelQuantity = quantity;
+
+
+        await order.save();
+        return res.status(200).json({ success: true, message: 'Item cancel requested successfully' });
+    } catch (error) {
+        console.log('Error in cancel one item',error)
+        next(error)
+    }
+};
+
+const returnSingleItem =  async (req, res,next) => {
+
+
+    try {
+        const { orderId } = req.params;
+        const { productId, reason, quantity } = req.body;
+        
+        const order = await Order.findOne({orderId:orderId});
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+                 // Find the specific item in orderedItems
+    const item = order.orderedItems.find(item => 
+        item.product.toString() === productId 
+    );
+    if (!item) {
+        return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+        
+
+
+        item.status = "Return Request";
+        item.returnReason = reason;
+        item.returnQuantity = quantity;
+
+
+        await order.save();
+        return res.status(200).json({ success: true, message: 'Item Return requested successfully' });
+    } catch (error) {
+        console.log('Error in return reqest single item',error)
+        next(error)
+    }
+};
+
+const getCancelItem = async (req, res) => {
+try {
+    const { orderId } = req.params;
+    const { productId } = req.query;
+
+    const order = await Order.findOne({orderId:orderId});
+    if (!order) {
+        return res.status(404).send("Order not found");
+    }
+    
+    // Find the specific item in orderedItems
+    const item = order.orderedItems.find(item => 
+            item.product.toString() === productId 
+        );
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Item not found in order' });
+        }
+
+        
+    const product = await Product.findById(item.product)
+    if(!product){
+        return res.status(404).send("product Image not found");
+    }
+    const productImage = product.productImage[0];
+    const productName = product.productName;
+    const quantity = item.quantity;
+
+    // Fetch the order and item details from the database
+    // Render the cancel item page with the orderId and itemId
+    res.render('user/cancel-item', { 
+        orderId, 
+        productId,
+        productImage,
+        quantity,
+        productName
+    
+    });
+} catch (error) {
+    console.log('Error in getCancelItem',error)
+    next(error)
+}
+};
+
+const getReturnItem = async (req, res,next) => {
+try {
+    const { orderId } = req.params;
+    const { productId } = req.query;
+
+    const order = await Order.findOne({orderId:orderId});
+    if (!order) {
+        return res.status(404).send("Order not found");
+    }
+    
+    // Find the specific item in orderedItems
+    const item = order.orderedItems.find(item => 
+            item.product.toString() === productId 
+        );
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Item not found in order' });
+        }
+
+
+    const product = await Product.findById(item.product)
+    if(!product){
+        return res.status(404).send("product Image not found");
+    }
+    const productImage = product.productImage[0];
+    const productName = product.productName;
+    const quantity = item.quantity;
+    
+
+    
+
+
+    res.render('user/return-item',{
+        orderId,
+        productId,
+        productImage,
+        quantity,
+        productName
+    
+    });
+    
+} catch (error) {
+    console.log('Error in getReturnItem',error)
+    next(error)
+}
+};
+
+
+const getWallet = async (req, res,next) => {
     try {
         // Assuming user ID is stored in session
         const userId = req.session.user;
@@ -262,13 +462,16 @@ const getWallet = async (req, res) => {
             return res.status(404).json({ message: "Wallet not found" });
         }
 
+                // Sort transactions by date in descending order
+                user.wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
         res.render("user/wallet", {
             user,
             wallet: user.wallet
         });
     } catch (error) {
         console.error("Error fetching wallet:", error);
-        res.status(500).json({ message: "Failed to retrieve wallet" });
+        next(error)
     }
 };
 
@@ -282,5 +485,9 @@ module.exports = {
     cancelOrReturn,
     verifyPayment,
     orderSuccess,
+    cancelSingleItem,
+    returnSingleItem,
+    getCancelItem,
+    getReturnItem,
     getWallet
 }

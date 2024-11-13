@@ -14,7 +14,7 @@ const crypto = require('crypto');
 
 
 
-const loadHomePage = async (req,res)=>{
+const loadHomePage = async (req,res,next)=>{
     try {
         const user = req.session.user
         const categories = await Category.find({isListed:true})
@@ -32,26 +32,26 @@ const loadHomePage = async (req,res)=>{
 
         } catch (error) {
         console.log('home page not found',error)
-        res.status(500).send('server error when loading homepage')
+        next(error)
     }
 }
-const pageNotFound = async (req,res)=>{
+const pageNotFound = async (req,res,next)=>{
     try {
        return res.render('user/404_error')
         
     } catch (error) {
         console.log('page not found',error)
-        res.status(500).send('server error when loading page')
+        next(error)
         
     }
 }
-const loadSignup = async (req,res)=>{
+const loadSignup = async (req,res,next)=>{
     try {
         return res.render('user/sign_up')
         
     } catch (error) {
         console.log('page not found',error)
-        res.status(500).send('server error when loading page')
+        next(error)
         
     }
 }
@@ -105,7 +105,7 @@ const securePassword = async function(password) {
 }
 
 //Signup function
-const signUp = async (req,res)=>{
+const signUp = async (req,res,next)=>{
     
     try {
         
@@ -141,7 +141,7 @@ const signUp = async (req,res)=>{
         
     } catch (error) {
         console.error('sign up error',error)
-        res.redirect('/pageNotFount')
+        next(error)
     }
 }
 // Function to generate a random referral code
@@ -150,7 +150,7 @@ const generateReferralCode = () => {
 };
 
 //Verify OTP
-const verifyOtp = async function(req,res) {
+const verifyOtp = async function(req,res,next) {
     try {
         const {otp} = req.body;
         console.log('OTP from user',otp)
@@ -185,12 +185,12 @@ console.log(userDeatils)
      } catch (error) {
   
         console.error('Error verifying OTP:', error);
-        res.status(500).json({ success: false, message: 'Error occurred when verifying OTP' });
+        next(error)
     }
 }
 
 //Resend OTP
-const resendOtp =async(req,res)=>{
+const resendOtp =async(req,res,next)=>{
     try {
         const{email} = req.session.tempUser;
         if(!email){
@@ -211,13 +211,13 @@ const resendOtp =async(req,res)=>{
         
     } catch (error) {
         console.error('Error resending OTP:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while resending OTP' });
+        next(error)
     }
 }
 
 
 //login function
-const loadLogin = async (req,res)=>{
+const loadLogin = async (req,res,next)=>{
     try {
         if(!req.session.user){
             return res.render('user/login')
@@ -226,11 +226,12 @@ const loadLogin = async (req,res)=>{
         }
     } catch (error) {
 
-        res.redirect('/pageNotFound')
+        console.log('Error in loadLogin',error)
+        next(error)
     }
 }
 
-const login = async (req,res)=>{
+const login = async (req,res,next)=>{
     try {
         const {email ,password} = req.body;
         const user =await User.findOne({isAdmin:0,email:email})
@@ -253,14 +254,14 @@ const login = async (req,res)=>{
 
     } catch (error) {
         console.error('Login error',error)
-        res.render('user/login',{message : 'Login failed, please try again later'})
+        next(error)
 
         
     }
 }
 
 //logout
-const logout = async(req,res)=>{
+const logout = async(req,res,next)=>{
     try {
         req.session.destroy((error)=>{
             if (error) {
@@ -272,7 +273,7 @@ const logout = async(req,res)=>{
         
     } catch (error) {
         console.log('Logout error',error)
-        res.redirect('/pageNotFound')
+        next(error)
     }
 }
 
@@ -404,7 +405,7 @@ const loadProducts = async (req, res, next) => {
     }
   };
 
-const loadProductDetails = async (req,res)=>{
+const loadProductDetails = async (req,res,next)=>{
     try {
        const {productId , categoryId}= req.query;
 
@@ -453,7 +454,7 @@ res.render('user/product-details', { product ,relatedProducts : transformedRelat
 
     } catch (error) {
        console.log('error loading product details',error)
-       res.redirect('/pageNotFount') 
+       next(error)
     }
 }
 

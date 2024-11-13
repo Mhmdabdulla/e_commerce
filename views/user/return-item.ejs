@@ -1,0 +1,137 @@
+<%- include("../partial/user/header.ejs") %>
+<head>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin-top: 8rem;
+        }
+        .cancellation-header {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            width: 100%;
+        }
+        .item-details {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .item-details img {
+            width: 100px;
+            height: auto;
+        }
+        .item-details a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        .item-details a:hover {
+            text-decoration: underline;
+        }
+        .btn-continue {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header cancellation-header">
+                    EASY RETURN
+                </div>
+                <div class="card-body">
+                    <form id="returnItemForm">
+                        <input type="hidden" name="orderId" value="<%= orderId %>">
+                        <input type="hidden" name="productId" value="<%= productId %>">
+
+                        <div class="form-group">
+                            <label for="quantity">
+                                Select product quantity
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="quantity" name="quantity" required>
+                                <option value="">Select Quantity</option>
+                                <%for(let i=1;i<=quantity;i++){%>
+                                    <option value="<%=i%>"><%=i%></option>
+                                <%}%>
+                                
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reason">
+                                Reason
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="reason" name="reason" placeholder="e.g., Item not good as expected." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-continue">
+                            CONTINUE
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="item-details">
+                <img alt="Image of Product" src="/uploads/re-images/<%= productImage %>" />
+                <p><%=productName%></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('returnItemForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(this);
+    const orderId = formData.get('orderId');
+    const productId = formData.get('productId');
+    const reason = formData.get('reason');
+    const quantity = formData.get('quantity');
+
+    fetch(`/orders/${orderId}/return-item`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, reason, quantity }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                          icon: 'success',
+                          title: 'Requested for cancellation',
+                          text: data.message,
+                          showConfirmButton: false,
+                          timer: 2000
+                      }).then(()=>{
+                        window.location.href = `/orders/${orderId}`; // Redirect to the order page
+                      });
+        } else {
+            Swal.fire({
+                          icon: 'error',
+                          title: 'Error',
+                          text: data.message,
+                          showConfirmButton: false,
+                          timer: 2000
+                      });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+</script>
+
+<%- include("../partial/user/footer.ejs") %>

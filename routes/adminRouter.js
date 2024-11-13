@@ -48,6 +48,7 @@ router.post('/deleteImage',adminAuth,productControllers.deleteSingleImage)
 router.get('/orders',adminAuth, orderControllers.getOrderList);
 router.get('/orders/:orderId',adminAuth, orderControllers.getOrderDetails);
 router.post('/changeOrderStatus',adminAuth,orderControllers.changeOrderStatus)
+router.post('/changeItemStatus', adminAuth , orderControllers.changeItemStatus)
 
 // Routes for creating and deleting coupons 
 router.get('/coupon' ,adminAuth,couponController.getCoupon)
@@ -56,9 +57,10 @@ router.put('/coupon/update/:couponId',adminAuth, couponController.updateCoupon);
 router.delete('/coupon/delete/:couponId', adminAuth, couponController.deleteCoupon);
 
 //sales report
-router.get('/report',salesReportController.getSalesReport)
-router.get("/download/pdf", salesReportController.downloadPDF)
-router.get("/download/excel" , salesReportController.downloadExcel)
+router.get('/report',adminAuth,salesReportController.getSalesReport)
+router.get("/download/pdf",adminAuth, salesReportController.downloadPDF)
+router.get("/download/excel" ,adminAuth, salesReportController.downloadExcel)
+
 
 
 

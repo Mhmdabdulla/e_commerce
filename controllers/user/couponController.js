@@ -2,7 +2,7 @@ const Cart = require('../../models/cartSchema')
 const Coupon = require('../../models/couponSchema')
 const User = require('../../models/userSchema')
 
-exports.applyCoupon = async (req, res) => {
+exports.applyCoupon = async (req, res,next) => {
     try {
         const { couponCode } = req.body;
         const userId = req.session.user; // Assuming user ID is stored in session
@@ -69,11 +69,11 @@ exports.applyCoupon = async (req, res) => {
         res.json({ success: true, message: 'Coupon applied successfully!', cart });
     } catch (error) {
         console.error("Error applying coupon: ", error);
-        res.status(500).json({ success: false, message: 'An error occurred while applying the coupon.' });
+        next(error)
     }
 }
 
-exports.removeCoupon = async (req, res) => {
+exports.removeCoupon = async (req, res,next) => {
     const userId = req.session.user;
     
     try {
@@ -94,6 +94,6 @@ exports.removeCoupon = async (req, res) => {
       res.json({ success: true, message: "Coupon removed successfully." });
     } catch (error) {
       console.error("Error removing coupon:", error);
-      res.status(500).json({ success: false, message: "Internal server error." });
+      next(error)
     }
   };

@@ -66,6 +66,13 @@ router.get('/checkout', userAuth, checkoutController.getCheckoutPage);
 // Apply coupon
 // router.post('/checkout/apply-coupon', userAuth, checkoutController.applyCoupon);
 
+
+   //return or cancel individual product from order details
+   router.get('/orders/:orderId/cancel-item',userAuth,checkoutController.getCancelItem)
+   router.get('/orders/:orderId/return-item',userAuth,checkoutController.getReturnItem)
+   router.post('/orders/:orderId/cancel-item',userAuth,checkoutController.cancelSingleItem)
+   router.post('/orders/:orderId/return-item',userAuth,checkoutController.returnSingleItem)
+   
 // Place order
 router.post('/checkout/place-order', userAuth, checkoutController.placeOrder);
 router.post("/checkout/verify-payment", userAuth, checkoutController.verifyPayment)
@@ -73,6 +80,7 @@ router.get('/order-success',userAuth,checkoutController.orderSuccess)
 router.get('/orders' , userAuth,checkoutController.getOrders)
 router.get('/orders/:orderId',userAuth,checkoutController.getOrderDetails)
 router.post('/orders/:orderId/:action',userAuth,checkoutController.cancelOrReturn)
+
 
 //whish list
 router.get('/wishlist', userAuth, wishlistController.getWishlist);

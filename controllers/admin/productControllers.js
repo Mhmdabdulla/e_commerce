@@ -7,18 +7,19 @@ const path = require('path')
 const sharp = require('sharp')
 
 
-const getProductAddPage = async (req,res)=>{
+const getProductAddPage = async (req,res,next)=>{
     try {
         const category = await Category.find({isListed:true})
         const brand = await Brand.find({isBlocked:false})
         res.render('admin/product-add',{cat:category,brand:brand})
     } catch (error) {
-        res.redirect('/admin/pageerror')
+        
         console.log('error when getproduct page',error)
+        next(error)
     }
 }
 
-const addProducts = async (req,res)=>{
+const addProducts = async (req,res,next)=>{
     try {
         const products = req.body;
         const productExist = await Product.findOne({
@@ -38,20 +39,40 @@ const addProducts = async (req,res)=>{
                     images.push(req.files[i].filename); 
                 }
             }
-            const categoryId = await Category.findOne({name:products.category})
+            const category = await Category.findOne({_id:products.category})
 
-            if(!categoryId){
+            if(!category){
                 return res.status(400).json('invalid category name')
             }
+
+             // Check the category offer
+             const categoryOffer = category.categoryOffer; // Assuming this is a percentage
+
+             let salePrice;
+             let productOffer;
+             if (categoryOffer > 0) {
+                 // Calculate the sale price based on the category offer
+                 productOffer = categoryOffer;
+                 salePrice = products.regularPrice - (products.regularPrice * (productOffer / 100));
+
+             } else {
+                 // No offer, set sale price as regular price
+                 productOffer = 0;
+                 salePrice = products.regularPrice;
+             }
+
+
+
             const newProduct = new Product({
                 productName : products.productName,
                 description : products.description,
-                category : categoryId._id,
+                category : category._id,
                 regularPrice : products.regularPrice,
-                salePrice : products.salePrice,
+                salePrice : salePrice,
                 createdOn : new Date(),
                 stock : products.quantity,
                 productImage : images,
+                productOffer : productOffer,
                 status : 'Available'
 
             })
@@ -63,11 +84,11 @@ const addProducts = async (req,res)=>{
         }
     } catch (error) {
         console.log('error when adding products', error)
-        res.redirect('/admin/pageerror')
+        next(error)
     }
 }
 
-const getAllProducts = async (req,res)=>{
+const getAllProducts = async (req,res,next)=>{
     try {
         const search = req.query.search || '';
         const page = req.query.page || 1;
@@ -107,35 +128,35 @@ const getAllProducts = async (req,res)=>{
             res.render('admin/404-error')
         }
     } catch (error) {
-        res.redirect('/admin/pageerror')
+        console.log('Error in getAllProducts',error)
+        next(error)
     }
 }
 
-const addProductOffer = async (req,res)=>{
+const addProductOffer = async (req,res,next)=>{
     try {
         const {productId,percentage} = req.body;
 
         const findProduct = await Product.findOne({_id:productId})
-        const findCategory = await Category.findOne({_id:findProduct.category})
+        // const findCategory = await Category.findOne({_id:findProduct.category})
 
-        if(findCategory.categoryOffer > percentage){
-            return res.json({status:false,message:'this product already have a category offer'})
+        // if(findCategory.categoryOffer > percentage){
+        //     return res.json({status:false,message:'this product already have a category offer'})
 
-        }
-        findProduct.salePrice = findProduct.salePrice - Math.floor(findProduct.regularPrice*(percentage/100));
+        // }
+        findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice*(percentage/100));
         findProduct.productOffer = parseInt(percentage)
         await findProduct.save();
-        findCategory.categoryOffer = 0;
-        await findCategory.save();
+        // findCategory.categoryOffer = 0;
+        // await findCategory.save();
         res.json({status:true})
     } catch (error) {
-        
-        res.status(500).json({status:false,message:'Internal server error'})
         console.log('error in server when addproduct offer',error)
+        next(error)
     }
 }
 
-const removeProductOffer = async (req,res)=>{
+const removeProductOffer = async (req,res,next)=>{
     try {
         const {productId} = req.body
         const findProduct = await Product.findOne({_id:productId})
@@ -146,13 +167,13 @@ const removeProductOffer = async (req,res)=>{
         await findProduct.save();
         res.json({status:true})
     } catch (error) {
-        res.redirect('/admin/pageerror')
         console.log('internal error when removing product offer',error)
+        next(error)
     }
 }
 
 
-const blockProduct= async (req,res)=>{
+const blockProduct= async (req,res,next)=>{
     try {
         const id = req.query.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:true}})
@@ -160,11 +181,11 @@ const blockProduct= async (req,res)=>{
 
     } catch (error) {
         console.log('error when blocking',error)
-        res.redirect('/admin/pageerror')
+       next(error)
     }
 }
 
-const unblockProduct = async (req,res)=>{
+const unblockProduct = async (req,res,next)=>{
     try {
         const id = req.query.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:false}})
@@ -172,11 +193,11 @@ const unblockProduct = async (req,res)=>{
 
     } catch (error) {
         console.log('error when unblocking',error)
-         res.redirect('/admin/pageerror')
+        next(error)
     }
 }
 
-const getEditProduct = async (req,res)=>{
+const getEditProduct = async (req,res,next)=>{
     try {
         const id = req.query.id
         const product = await Product.findOne({_id:id})
@@ -189,11 +210,11 @@ const getEditProduct = async (req,res)=>{
         })
     } catch (error) {
         console.log('error when loading product editing page',error)
-        res.redirect('/admin/pageerror')
+        next(error)
     }
 }
 
-const editProduct = async (req,res)=>{
+const editProduct = async (req,res,next)=>{
     try {
         const id = req.params.id;
         const product = await Product.findOne({_id:id})
@@ -216,14 +237,41 @@ const editProduct = async (req,res)=>{
             }
         }
 
+        const category = await Category.findOne({_id:data.category})
+        
+
+        if(!category){
+            return res.status(400).json('invalid category name')
+        }
+
+         // Check the category offer
+         const categoryOffer = category.categoryOffer; 
+         let  productOffer = product.productOffer;
+
+         let salePrice;
+         if (categoryOffer > 0 && productOffer > 0) {
+            if(categoryOffer > productOffer){
+                productOffer = categoryOffer
+            }
+             // Calculate the sale price based on the category offer
+             salePrice = data.regularPrice - (data.regularPrice * (productOffer / 100));
+         } else if(categoryOffer >0 && productOffer == 0) {
+            productOffer = categoryOffer;
+             // No offer, set sale price as regular price
+             salePrice = data.regularPrice - (data.regularPrice * (productOffer / 100));
+         }else{
+            salePrice = data.regularPrice;
+         }
+
         const updateField = {
             productName : data.productName,
             description : data.descriptionData,
             // brand : data.brand,
             category : data.category,
             regularPrice : data.regularPrice,
-            salePrice : data.salePrice,
+            salePrice : salePrice,
             stock : data.quantity,
+            productOffer : productOffer
     
 
         }
@@ -235,11 +283,11 @@ const editProduct = async (req,res)=>{
         res.redirect('/admin/products');
     } catch (error) {
         console.error('error when editing product',error)
-        res.redirect('/admin/pageerror')
+        next(error)
     }
 }
 
-const deleteSingleImage = async (req,res)=>{
+const deleteSingleImage = async (req,res,next)=>{
     try {
         const {imageNameToServer,productIdToServer} = req.body;
         await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}})
@@ -254,7 +302,7 @@ const deleteSingleImage = async (req,res)=>{
 
     } catch (error) {
         console.error('error when deleting image',error)
-        res.redirect('/admin/pageerror')
+        next(error)
     }
 }
 

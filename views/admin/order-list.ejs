@@ -43,8 +43,8 @@
                     <td>₹<%= order.finalAmount.toFixed(2) %></td>
                     <td><%= order.status %></td>
                     <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
-                    <td>Cash on Delivery</td>
-                    <td>Pending</td>
+                    <td><%= order.paymentMethod %></td>
+                    <td><%= order.paymentStatus %></td>
                     <td>
                         <a href="/admin/orders/<%= order.orderId %>" class="btn btn-primary">View</a>
                     </td>

@@ -1,0 +1,103 @@
+<html>
+ <head>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" rel="stylesheet"/>
+  <style>
+   body {
+            background-color: #f8f9fa;
+        }
+        .cancellation-header {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .cancellation-header span {
+            margin-right: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            width: 100%;
+        }
+        .item-details {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .item-details img {
+            width: 100px;
+            height: auto;
+        }
+        .item-details a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        .item-details a:hover {
+            text-decoration: underline;
+        }
+        .btn-continue {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #6c757d;
+        }
+  </style>
+ </head>
+ <body>
+  <div class="container mt-4">
+   <div class="row">
+    <div class="col-md-8">
+     <div class="card">
+      <div class="card-header cancellation-header">
+       <span>
+        1
+       </span>
+       EASY CANCELLATION
+      </div>
+      <div class="card-body">
+       <div class="form-group">
+        <label for="reason">
+         Reason for Cancellation
+         <span class="text-danger">
+          *
+         </span>
+        </label>
+        <select class="form-control" id="reason">
+         <option>
+          Select Reason
+         </option>
+        </select>
+       </div>
+       <div class="form-group">
+        <label for="comments">
+         Comments
+         <span class="text-danger">
+          *
+         </span>
+        </label>
+        <textarea class="form-control" id="comments" placeholder="eg: Item not required anymore."></textarea>
+       </div>
+       <button class="btn btn-continue">
+        CONTINUE
+       </button>
+      </div>
+     </div>
+    </div>
+    <div class="col-md-4">
+     <div class="item-details">
+      <img alt="Image of Tata Sampann Yellow Moong Dal (Split) package" height="100" src="https://storage.googleapis.com/a1aa/image/1zf9eImCTyuUhUt6km85wntyqNlKK4OR2P2yfMf37wvoWiAPB.jpg" width="100"/>
+      <p>
+       Tata Sampann Yellow Moong Dal (Split)
+      </p>
+      <a href="#">
+       +5 more items
+      </a>
+      <p>
+       ₹0
+      </p>
+     </div>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

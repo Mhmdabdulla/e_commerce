@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema')
 
-const customerInfo = async (req,res)=>{
+const customerInfo = async (req,res,next)=>{
     try {
         let search = '';
         if(req.query.search){
@@ -38,29 +38,31 @@ const customerInfo = async (req,res)=>{
         
     } catch (error) {
         console.log('error in customerInfo',error)
-        res.redirect('admin/pageerror')
+        next(error)
     }
 }
 
-const customerBlocked = async (req,res)=>{
+const customerBlocked = async (req,res,next)=>{
 try {
     let id = req.query.id
     await User.updateOne({_id:id},{$set:{isBlocked : true}})
     res.redirect('/admin/users')
     
 } catch (error) {
-    res.redirect('/pageerror')
+    console.log('Error in customerBlocked',error)
+    next(error)
 }
 }
 
-const customerunBlocked = async (req,res)=>{
+const customerunBlocked = async (req,res,next)=>{
     try {
         let id = req.query.id
         await User.updateOne({_id:id},{$set:{isBlocked : false}})
         res.redirect('/admin/users')
         
     } catch (error) {
-        res.redirect('/pageerror')
+        console.log('Error in customerunBlocked',error)
+        next(error)
     }
     }
     

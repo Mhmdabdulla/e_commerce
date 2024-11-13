@@ -10,6 +10,7 @@ const adminRouter = require('./routes/adminRouter')
 const session = require('express-session')
 const passport = require('./config/passport')
 const User = require('./models/userSchema')
+const {errorHandler} = require('./middlewares/error')
 db()
 
 
@@ -45,6 +46,8 @@ app.use(passport.session())
 
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT;
 

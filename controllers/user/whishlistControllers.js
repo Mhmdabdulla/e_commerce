@@ -3,7 +3,7 @@ const Wishlist = require('../../models/whishlistSchema');
 const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema')
 
-exports.getWishlist = async (req, res) => {
+exports.getWishlist = async (req, res,next) => {
     try {
         const userId = req.session.user;
         const wishlist = await Wishlist.findOne({ userId }).populate('products.productId');
@@ -11,7 +11,7 @@ exports.getWishlist = async (req, res) => {
         res.render('user/whishlist', { wishlist ,user:userData});
     } catch (error) {
         console.error('Error fetching wishlist:', error);
-        res.status(500).send('Error fetching wishlist');
+        next(error)
     }
 };
 
@@ -33,7 +33,7 @@ exports.addToWishlist = async (req, res) => {
         res.json({ message: 'Product added to wishlist successfully' });
     } catch (error) {
         console.error('Error adding to wishlist:', error);
-        res.status(500).json({ message: 'Error adding to wishlist' });
+    
     }
 };
 
@@ -50,6 +50,6 @@ exports.removeFromWishlist = async (req, res) => {
     })
     .catch(error => {
         console.error('Error removing product from wishlist:', error);
-        res.status(500).json({ message: 'An error occurred while removing the product' });
+       
     });
 };
