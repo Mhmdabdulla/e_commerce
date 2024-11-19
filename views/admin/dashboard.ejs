@@ -152,8 +152,8 @@
    
   
 
-   const salesData = <% JSON.stringify(salesData) %>;
-
+   const salesData = <%- JSON.stringify(salesData) %>
+console.log(salesData)
    const labels = salesData.map(item => {
     if (item._id.day) {
         // Daily view with day, month, and year

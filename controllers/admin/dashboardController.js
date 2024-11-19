@@ -11,7 +11,7 @@ const getDashboard = async (req, res, next) => {
 
         // Get filter from query
         const filter = req.query.filter || 'yearly';
-        let dateFilter = {}; 
+        let dateFilter = {status: "Delivered" }; 
         const currentDate = new Date();
   
         // Filter based on time frame

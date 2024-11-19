@@ -38,6 +38,14 @@
             border: 1px solid #ddd;
             color: #6c757d;
         }
+
+        .is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
     </style>
 </head>
 
@@ -58,20 +66,22 @@
                                 Select product quantity
                                 <span class="text-danger">*</span>
                             </label>
-                            <select class="form-control" id="quantity" name="quantity" required>
+                            <select class="form-control" id="quantity" name="quantity" >
                                 <option value="">Select Quantity</option>
                                 <%for(let i=1;i<=quantity;i++){%>
                                     <option value="<%=i%>"><%=i%></option>
                                 <%}%>
                                 
                             </select>
+                            <div class="invalid-feedback" id="quantityError"></div>
                         </div>
                         <div class="form-group">
                             <label for="reason">
                                 Reason
                                 <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="reason" name="reason" placeholder="e.g., Item not required anymore." required></textarea>
+                            <textarea class="form-control" id="reason" name="reason" placeholder="e.g., Item not required anymore." ></textarea>
+                            <div class="invalid-feedback" id="reasonError"></div>
                         </div>
                         <button type="submit" class="btn btn-continue">
                             CONTINUE
@@ -89,9 +99,16 @@
     </div>
 </div>
 
+
+
 <script>
 document.getElementById('returnItemForm').addEventListener('submit', function(e) {
     e.preventDefault(); // Prevent the default form submission
+
+
+if (!validateForm()) {
+    return; // Stop if validation fails
+}
 
     const formData = new FormData(this);
     const orderId = formData.get('orderId');
@@ -134,5 +151,38 @@ document.getElementById('returnItemForm').addEventListener('submit', function(e)
     });
 });
 </script>
+
+<script>
+    function validateForm() {
+        const quantity = document.getElementById('quantity');
+        const reason = document.getElementById('reason');
+        let isValid = true;
+
+        // Reset error messages
+        document.getElementById('quantityError').innerText = '';
+        document.getElementById('reasonError').innerText = '';
+
+        // Validate quantity
+        if (quantity.value === "") {
+            document.getElementById('quantityError').innerText = 'Please select a quantity.';
+            quantity.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            quantity.classList.remove('is-invalid');
+        }
+
+        // Validate reason
+        if (reason.value.trim() === "") {
+            document.getElementById('reasonError').innerText = 'Please provide a reason.';
+            reason.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            reason.classList.remove('is-invalid');
+        }
+
+        return isValid; // Only submit if valid
+    }
+</script>
+
 
 <%- include("../partial/user/footer.ejs") %>
