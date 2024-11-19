@@ -10,6 +10,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { error } = require('console');
 const env = require('dotenv').config();
+const PDFDocument = require('pdfkit')
 
 // Initialize Razorpay instance with credentials
 const razorpay = new Razorpay({
@@ -45,7 +46,7 @@ const placeOrder = async (req,res,next) =>{
         const cart = await Cart.findOne({ userId }).populate('items.productId');
 
         if (!cart || cart.items.length === 0) {
-            return res.status(400).send("Your cart is empty");
+            return res.status(400).json({success:false , message : 'Your cart is empty'})
         }
 
         const orderedItems = cart.items.map(item => ({
@@ -66,10 +67,14 @@ const placeOrder = async (req,res,next) =>{
       : null;
 
         if (paymentMethod === 'Cash on Delivery') {
+
+
+
             const newOrder = new Order({
             userId,
             orderedItems,
             totalPrice: cart.totalPrice,
+            totalMRP : cart.totalMRP,
             finalAmount: cart.finalAmount,  
             discount : cart.totalDiscount,
             address: selectedAddress,
@@ -78,6 +83,10 @@ const placeOrder = async (req,res,next) =>{
             couponApplied: isCouponApplied,
             appliedCoupon: appliedCoupon, 
         });
+
+        if (newOrder.finalAmount > 500) {
+            return res.status(400).json({ success: false , message : 'Order above Rs 500 should not be allowed for COD' })
+        }
 
         await newOrder.save();
 
@@ -130,6 +139,7 @@ const placeOrder = async (req,res,next) =>{
             userId,
             orderedItems,
             totalPrice: cart.totalPrice,
+            totalMRP : cart.totalMRP, 
             finalAmount: cart.finalAmount,
             discount: cart.totalDiscount,
             address: selectedAddress,
@@ -163,13 +173,15 @@ const placeOrder = async (req,res,next) =>{
           userId,
           orderedItems,
           totalPrice: cart.totalPrice,
+          totalMRP : cart.totalMRP,
           finalAmount: cart.finalAmount,
           discount : cart.totalDiscount,
           address: selectedAddress,
           status: "Pending",
           paymentMethod: "Razorpay",
-          paymentStatus : "Completed",
+          paymentStatus : "Pending",
           razorpayOrderId: razorpayOrder.id,
+          razorpayPaymentId:'',
           couponApplied: isCouponApplied,
           appliedCoupon: appliedCoupon,
         });
@@ -194,27 +206,66 @@ const placeOrder = async (req,res,next) =>{
     }
 };
 
+// Repayment 
+const rePayment = async (req, res,next) => {
+    try {
+        const { orderId } = req.params;
+
+        // Find the order
+        const order = await Order.findById(orderId );
+
+        // Check if the order exists and is eligible for repayment
+        if (!order || order.paymentMethod !== 'Razorpay' || order.paymentStatus !== 'Pending') {
+            return res.status(400).json({ success: false, message: 'Order is not eligible for repayment.' });
+        }
+
+        // Create a new Razorpay order
+        const razorpayOrder = await razorpay.orders.create({
+            amount: order.finalAmount * 100, // Amount in smallest currency unit (paise)
+            currency: 'INR',
+            receipt: `order_rcptid_${new Date().getTime()}`,
+        });
+
+        // Update the existing order with the new Razorpay order ID
+        order.razorpayOrderId = razorpayOrder.id;
+        await order.save();
+
+        // Send the new order details to the frontend
+        return res.json({
+            success: true,
+            razorpayOrderId: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+        });
+    } catch (error) {
+        console.error('Error in repay:', error);
+        next(error)
+    }
+};
+
 //verify payment
 const verifyPayment = async (req, res,next) => {
     try {
         
 
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
-  
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
-  
     if (generatedSignature === razorpay_signature) {
       await Order.findByIdAndUpdate(orderId, {
         paymentStatus: "Completed",
         razorpayPaymentId: razorpay_payment_id,
         status: 'Pending',
       });
-      return res.json({ success: true });
+      return res.json({ success: true ,message:"Your payment has been successfully verified." });
     } else {
-      return res.json({ success: false });
+        await Order.findByIdAndUpdate(orderId, {
+            paymentStatus:"Failed"   // Update payment status to Failed
+            
+          });
+      return res.json({ success: false ,message:'Invalid signature, payment verification failed' });
     }
 } catch (error) {
     console.log('Error in verifyPayment',error)
@@ -222,6 +273,8 @@ const verifyPayment = async (req, res,next) => {
         
 }
   };
+
+
 
 const getOrders = async (req, res,next) => {
     try {
@@ -273,6 +326,19 @@ const cancelOrReturn = async (req,res,next) => {
             order.status = 'Return Request';
             order.returnReason = reason;
         }
+
+        //change individual item status according to order status
+        order.orderedItems.forEach(item =>{
+            if(item.status !== "Returned" && item.status !== "Cancelled" &&  item.status !== "Return Request" && item.status !== "Cancel Request") {
+                if (action === 'cancel') {
+                    item.status = 'Cancel Request';
+                    
+                } else if (action === 'return') {
+                    item.status = 'Return Request';
+                    
+                }
+            }
+        })
 
         await order.save();
         res.status(200).json({ message: `Order ${action} Requested successfully` });
@@ -475,7 +541,57 @@ const getWallet = async (req, res,next) => {
     }
 };
 
+const generateInvoice = async (req, res ,next) => {
+    try {
+        const { orderId } = req.params;
 
+        // Find the order by ID
+        const order = await Order.findOne({ orderId }).populate('orderedItems.product').populate('address');
+        console.log('Order : ', order)
+
+        // Check if the order exists and is delivered
+        if (!order || order.status !== 'Delivered') {
+            return res.status(404).json({ success: false, message: 'Order not found or not delivered.' });
+        }
+
+        // Create a PDF document
+        const doc = new PDFDocument();
+
+        // Set the response headers
+        res.setHeader('Content-disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
+        res.setHeader('Content-type', 'application/pdf');
+
+        // Pipe the PDF into the response
+        doc.pipe(res);
+
+        // Add content to the PDF
+        doc.fontSize(20).text('Invoice', { align: 'center' });
+        doc.moveDown();
+
+        doc.fontSize(12).text(`Invoice No: ${order.invoice.invoiceNo}`);
+        doc.text(`Invoice Date: ${order.invoice.invoiceDate.toLocaleDateString()}`);
+        doc.text(`Order ID: ${order.orderId}`);
+        doc.text(`Order Date: ${order.createdOn.toLocaleDateString()}`);
+        doc.text(`Total Amount: ₹${order.finalAmount.toFixed(2)}`);
+        doc.moveDown();
+
+        doc.text('Ordered Items:', { underline: true });
+        order.orderedItems.forEach(item => {
+            doc.text(`- ${item.product.productName} (Quantity: ${item.quantity}) - ₹${item.price.toFixed(2)}`);
+        });
+
+        doc.moveDown();
+        doc.text(`Shipping Address: ${order.address.landMark}, ${order.address.city}, ${order.address.pincode}`);
+        doc.text(`Payment Method: ${order.paymentMethod}`);
+        doc.text(`Payment Status: ${order.paymentStatus}`);
+
+        // Finalize the PDF and end the stream
+        doc.end();
+    } catch (error) {
+        console.error('Error generating invoice:', error);
+        next(error)
+    }
+};
 
 module.exports = {
     getCheckoutPage,
@@ -489,5 +605,7 @@ module.exports = {
     returnSingleItem,
     getCancelItem,
     getReturnItem,
-    getWallet
+    getWallet,
+    rePayment,
+    generateInvoice
 }

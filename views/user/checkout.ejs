@@ -672,6 +672,7 @@
   }
 </script>
 
+<!--place order-->
 <script>
   document.getElementById("placeOrderBtn").onclick = async function () {
     const paymentMethod = document.querySelector("input[name='paymentMethod']:checked").value;
@@ -736,7 +737,7 @@
             Swal.fire({
                             icon: "success",
                             title: "Payment Successful!",
-                            text: "Your payment has been successfully verified.",
+                            text: result.message ||"Your payment has been successfully verified.",
                             timer: 2000,
                             showConfirmButton: false,
                         }).then(() => {
@@ -746,7 +747,7 @@
             Swal.fire({
                             icon: "error",
                             title: "Payment Failed",
-                            text: "Payment verification failed. Please try again!",
+                            text: result.message ||"Payment verification failed. Please try again!",
                         });
           }
         },
@@ -788,7 +789,7 @@
 </script>
 
 
-
+<!--coupon apply-->
 <script>
   document.getElementById('couponBtn').addEventListener('click', function() {
     const selectedCoupon = document.getElementById('couponSelect').value;

@@ -162,6 +162,17 @@
                     />
                     <div id="error5" class="error_message"></div>
                   </div>
+                  <div class="form-group">
+                    <label for="referralCode">Referral Code (optional)</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="referralCode"
+                        id="referralCode"
+                        placeholder="Enter referral code (if any)"
+                    />
+                    <div id="error6" class="error_message"></div>
+                </div>
                   <% if (locals.message && message.length > 0) { %>
                   <div class="alert alert-danger text-center">
                     <%= message %>
@@ -214,6 +225,7 @@
       const error3 = document.getElementById('error3');
       const error4 = document.getElementById('error4');
       const error5 = document.getElementById('error5');
+      const error6 = document.getElementById('error6');
       const signform = document.getElementById('signform');
 
       function nameValidateChecking() {
@@ -282,18 +294,31 @@
         }
       }
 
+      function referralCodeValidateChecking() {
+    const referralCodeVal = document.getElementById('referralCode').value; // Move this inside the function
+    if (referralCodeVal.trim() !== "" && referralCodeVal.length < 6) {
+      console.log(referralCodeVal);
+      error6.style.display = 'block';
+      error6.innerHTML = 'Referral code must be at least 6 characters long';
+    } else {
+      error6.style.display = 'none';
+    }
+  }
+
       signform.addEventListener('submit', (event) => {
         nameValidateChecking();
         emailValidateChecking();
         phoneValidateChecking();
         passValidateChecking();
+        referralCodeValidateChecking();
 
         if (
           error1.style.display === "block" ||
           error2.style.display === "block" ||
           error3.style.display === "block" ||
           error4.style.display === "block" ||
-          error5.style.display === "block"
+          error5.style.display === "block" ||
+          error6.style.display === "block"
         ) {
           event.preventDefault();
         }

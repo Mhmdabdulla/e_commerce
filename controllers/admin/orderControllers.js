@@ -107,7 +107,7 @@ const changeOrderStatus = async (req,res,next) => {
 
                 //updating individual items
                 order.orderedItems.forEach(item =>{
-                    if(item.status !== "Returned" && item.status !== "Cancelled" &&  item.status !== "Return Request" && item.status !== "Cancel Request"){
+                    if(item.status !== "Returned" && item.status !== "Cancelled" ){
                         item.status = status;
                     }else{
                         item.status = item.status

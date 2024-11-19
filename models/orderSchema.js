@@ -65,6 +65,11 @@ const orderSchema = new Schema({
     type: Number,
     required: true,
   },
+  totalMRP :{
+    type : Number,
+    default : 0
+  },
+  //total discount
   discount: {
     type: Number,
     default: 0,
@@ -134,7 +139,7 @@ const orderSchema = new Schema({
     type: String,
     default: "none",
   },
-});
+},{timestamps:true});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

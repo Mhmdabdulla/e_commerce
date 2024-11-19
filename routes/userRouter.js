@@ -80,6 +80,10 @@ router.get('/order-success',userAuth,checkoutController.orderSuccess)
 router.get('/orders' , userAuth,checkoutController.getOrders)
 router.get('/orders/:orderId',userAuth,checkoutController.getOrderDetails)
 router.post('/orders/:orderId/:action',userAuth,checkoutController.cancelOrReturn)
+  //repayment 
+router.post('/repay/:orderId' , userAuth , checkoutController.rePayment)
+  //invoice
+router.get('/invoice/:orderId',userAuth , checkoutController.generateInvoice)
 
 
 //whish list

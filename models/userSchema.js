@@ -47,17 +47,16 @@ const userSchema = new Schema({
         type:Date,
         default:Date.now,
     },
-    referalCode:{
+    referralCode:{
         type:String,
-        unique : true
+        unique : true,
+        sparse: true
     },
-    redeemed:{
-        type:Boolean
-    },
-    redeemedUsers: [{
+    referrer: {
         type: Schema.Types.ObjectId,
-        ref:"User"
-    }],
+        ref: "User ",
+        default: null
+    },
     usedCoupons: [{ // field to track used coupons
         type: Schema.Types.ObjectId,
         ref: "Coupon"

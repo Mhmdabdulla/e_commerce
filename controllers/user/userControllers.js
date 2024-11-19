@@ -109,12 +109,21 @@ const signUp = async (req,res,next)=>{
     
     try {
         
-        const {name , email,phone , password ,cpassword} = req.body;
+        const {name , email,phone , password ,cpassword,referralCode} = req.body;
+        console.log(req.body)
      
         if(password !== cpassword){
             return res.render('user/sign_up',{message : "Password do not match"})
         }
         
+                // Check if the referral code is valid
+                let referrer = null;
+                if (referralCode) {
+                    referrer = await User.findOne({ referralCode });
+                    if (!referrer) {
+                        return res.status(400).json({ message: "Invalid referral code." });
+                    }
+                }
         
 
         const existingUser = await User.findOne({ email });
@@ -131,7 +140,7 @@ const signUp = async (req,res,next)=>{
 
         const hashedPassword = await securePassword(password);
         req.session.userOtp = otp;
-        req.session.tempUser = {name,email,phone, password:hashedPassword}
+        req.session.tempUser = {name,email,phone, password:hashedPassword,referrer:referrer ? referrer : null};
         
 
         console.log('OTP send',otp)
@@ -164,15 +173,34 @@ const verifyOtp = async function(req,res,next) {
              userDeatils.wallet = wallet._id;
 
             // Generate a unique referral code
-             const referralCode = generateReferralCode();
-              userDeatils.referalCode = referralCode;
-console.log(userDeatils)
+            let referralCode;
+            let isUnique = false;
+
+            while (!isUnique) {
+                referralCode = generateReferralCode(); // Implement this function to generate a code
+                const existingReferral = await User.findOne({ referralCode });
+                if (!existingReferral) {
+                    isUnique = true; // Found a unique referral code
+                }
+            }
+
+            userDeatils.referralCode = referralCode;
+
+
 
             const userData = new User(userDeatils);
-
             await userData.save();
+            
+            //reward if refrerrer available
+            if (userDeatils.referrer){
+                const rewardAmount = 10; // Define the reward amount
+                await Wallet.findByIdAndUpdate(userData.referrer.wallet, { $inc: { balance: rewardAmount } });
+                await Wallet.findByIdAndUpdate(wallet._id, { $inc: { balance: rewardAmount } });
+            }
+            
+            
+            
             req.session.user = userData._id;
-
             delete req.session.tempUser;
             delete req.session.userOtp;
 
