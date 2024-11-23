@@ -36,7 +36,7 @@
             <% coupons.forEach(coupon => { %>
                 <tr>
                     <td><%= coupon.code %></td>
-                    <td><%= coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '$' + coupon.discountAmount %></td>
+                    <td><%= coupon.discountType === 'percentage' ? coupon.discountAmount + '%' : '₹' + coupon.discountAmount %></td>
                     <td><%= coupon.discountType %></td>
                     <td>₹<%= coupon.minimumPrice %></td>
                     <td>₹<%=coupon.maximumPrice%></td>

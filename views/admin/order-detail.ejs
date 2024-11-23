@@ -49,7 +49,12 @@
     <!-- Status Change Dropdown -->
     <div class="d-flex justify-content-end mb-4">
         <div class="form-group">
-            <% if (order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+            <% if (order.status == 'Delivered') { %>
+                <span class="badge bg-secondary text-white">
+                    <%= order.status %>
+                </span>
+
+            <%}else if(order.status !== 'Cancelled' && order.status !== 'Returned'){%>
                 <label for="orderStatus">Change Order Status</label>
                 <select class="form-control bg-info text-white" id="orderStatus" 
                         style="border: 2px solid #007bff; border-radius: 5px;" 
@@ -59,7 +64,6 @@
                     <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                     <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                     <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
                     <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
                 </select>
             <% } else { %>
