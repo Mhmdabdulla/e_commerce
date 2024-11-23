@@ -62,9 +62,6 @@ exports.applyCoupon = async (req, res,next) => {
         // Save the updated cart
         await cart.save();
 
-                // Mark the coupon as used by the user
-                user.usedCoupons.push(coupon._id);
-                await user.save();
 
         res.json({ success: true, message: 'Coupon applied successfully!', cart });
     } catch (error) {

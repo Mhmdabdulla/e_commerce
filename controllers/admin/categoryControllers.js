@@ -103,7 +103,7 @@ const removeCategoryOffer = async (req,res,next)=>{
 //will added to sale price, so all product within that category will increase by sale price
         if(products.length > 0){
             for(const product of products){
-               product.salePrice += Math.floor(product.regularPrice * (percentage/100))
+               product.salePrice = product.regularPrice;
                product.productOffer = 0;
                await product.save();
             }

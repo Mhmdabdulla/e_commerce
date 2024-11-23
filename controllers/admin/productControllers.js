@@ -138,17 +138,11 @@ const addProductOffer = async (req,res,next)=>{
         const {productId,percentage} = req.body;
 
         const findProduct = await Product.findOne({_id:productId})
-        // const findCategory = await Category.findOne({_id:findProduct.category})
 
-        // if(findCategory.categoryOffer > percentage){
-        //     return res.json({status:false,message:'this product already have a category offer'})
-
-        // }
         findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice*(percentage/100));
         findProduct.productOffer = parseInt(percentage)
         await findProduct.save();
-        // findCategory.categoryOffer = 0;
-        // await findCategory.save();
+
         res.json({status:true})
     } catch (error) {
         console.log('error in server when addproduct offer',error)
@@ -160,8 +154,7 @@ const removeProductOffer = async (req,res,next)=>{
     try {
         const {productId} = req.body
         const findProduct = await Product.findOne({_id:productId})
-        const percentage = findProduct.productOffer;
-        // findProduct.salePrice = findProduct.salePrice + Math.floor(findProduct.regularPrice*(percentage/100));
+
         findProduct.salePrice = findProduct.regularPrice
         findProduct.productOffer = 0;
         await findProduct.save();
@@ -257,9 +250,10 @@ const editProduct = async (req,res,next)=>{
              salePrice = data.regularPrice - (data.regularPrice * (productOffer / 100));
          } else if(categoryOffer >0 && productOffer == 0) {
             productOffer = categoryOffer;
-             // No offer, set sale price as regular price
+             
              salePrice = data.regularPrice - (data.regularPrice * (productOffer / 100));
          }else{
+            // No offer, set sale price as regular price
             salePrice = data.regularPrice;
          }
 
@@ -275,7 +269,7 @@ const editProduct = async (req,res,next)=>{
     
 
         }
-        console.log(updateField.description,updateField.quantity)
+        
         if(req.files.length>0){
             updateField.$push = {productImage:{$each:images}}
         }

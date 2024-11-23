@@ -5,7 +5,7 @@ function errorHandler(err, req, res, next) {
     res.status(statusCode).redirect('/admin/pageerror');
     }else{
         console.log(statusCode,err)
-        res.status(statusCode).redirect('/user/pageNotFound')  
+        res.status(statusCode).redirect('/pageNotFount')  
     }
     next()
 }

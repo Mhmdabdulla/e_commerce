@@ -61,8 +61,11 @@ const addAddress = async (req,res,next)=>{
             altPhone
         });
         await newAddress.save();
+        if(req.query.from == 'address'){
         res.redirect('/address');
-
+        }else{
+            res.redirect('/checkout')
+        }
     } catch (error) {
         console.error(error)
         next(error)
@@ -77,7 +80,13 @@ const editAddress = async (req,res,next) => {
             { _id: req.params.id, user: userId },
             { name, city, landMark, state, pincode, phone, altPhone }
         );
-        res.redirect('/address');
+
+        
+        if(req.query.from == 'address'){
+            res.redirect('/address');
+            }else{
+                res.redirect('/checkout')
+            }
     } catch (error) {
         console.error(error)
         next(error)
@@ -98,18 +107,18 @@ const deleteAddress = async (req,res,next) => {
 const updateProfile = async (req,res,next) => {
     try {
         const userId = req.session.user
-        const { name, email, phone } = req.body;
+        const { name,  phone } = req.body;
 
                 // Validate inputs
-                if (!name || !email || !phone) {
-                    req.flash('error', 'All fields are required.');
+                if (!name  || !phone) {
+                    console.log('no credentila')
                     return res.redirect('/profile');
                 }
 
                         // Update user information
-        await User.findByIdAndUpdate(userId, { name, email, phone });
+        await User.findByIdAndUpdate(userId, { name,  phone });
 
-        req.flash('success', 'Profile updated successfully.');
+        
         res.redirect('/profile');
 
     } catch (error) {
@@ -125,27 +134,20 @@ const changePassword = async (req,res,next) => {
 
                 // Validate inputs
                 if (!currentPassword || !newPassword || !confirmPassword) {
-                    req.flash('error', 'All fields are required.');
-                    return res.redirect('/profile');
+                    return res.status(400).send('All fields are required.');
                 }
 
-                if (newPassword !== confirmPassword) {
-                    req.flash('error', 'New passwords do not match.');
-                    return res.redirect('/profile');
-                }
         
                 // Find user
                 const user = await User.findById(userId);
                 if (!user) {
-                    req.flash('error', 'User not found.');
-                    return res.redirect('/profile');
+                   return res.status(404).send('User  not found.');
                 }
         
                 // Check current password
                 const isMatch = await bcrypt.compare(currentPassword, user.password);
-                if (!isMatch) {
-                    req.flash('error', 'Current password is incorrect.');
-                    return res.redirect('/profile');
+                if (!isMatch) { 
+                    return res.status(401).send('Current password is incorrect.');
                 }
         
                 // Hash new password
@@ -155,8 +157,8 @@ const changePassword = async (req,res,next) => {
                 user.password = hashedPassword;
                 await user.save();
         
-                req.flash('success', 'Password changed successfully.');
-                res.redirect('/profile');
+             
+                res.status(200).send('Password changed successfully.');
         
     } catch (error) {
         console.error('Error in changePassword',error);

@@ -157,10 +157,17 @@ const updateCartQuantity = async (req, res,next) => {
 
         // Recalculate totals
         calculateCartTotals(cart);
+        console.log(productItem)
 
         await cart.save();
         await product.save();
-        return res.status(200).json({success:true, message: 'Cart updated successfully',newTotalPrice: productItem.totalPrice });
+        return res.status(200).json({success:true, message: 'Cart updated successfully',
+             productItem,
+             MRP : cart.totalMRP,
+             productDiscount :cart.totalDiscount,
+             deliveryFee: cart.shippingFee,
+             totalAmount : cart.totalPrice
+             });
     } catch (error) {
         console.log('Error when updating cart quantity', error);
         next(error)

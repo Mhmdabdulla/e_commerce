@@ -58,9 +58,9 @@ router.put('/coupon/update/:couponId',adminAuth, couponController.updateCoupon);
 router.delete('/coupon/delete/:couponId', adminAuth, couponController.deleteCoupon);
 
 //sales report
-router.get('/report',adminAuth,salesReportController.getSalesReport)
-router.get("/download/pdf",adminAuth, salesReportController.downloadPDF)
-router.get("/download/excel" ,adminAuth, salesReportController.downloadExcel)
+router.get('/salesreport',adminAuth,salesReportController.getSalesReport)
+router.get("/salesreport/pdf",adminAuth, salesReportController.downloadPDF)
+router.get("/salesreport/excel" ,adminAuth, salesReportController.downloadExcel)
 
 
 

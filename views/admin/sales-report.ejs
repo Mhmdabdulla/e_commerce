@@ -1,195 +1,297 @@
 <%- include("../partial/admin/header.ejs") %>
-<style>
-/* Ensure uniform button sizes and spacing */
-.btn-group .btn {
-  padding: 8px 16px;
-  font-size: 12px;
-  width: auto;
-  margin: 0 5px;
-}
+<head>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"
+  />
+</head>
 
-@media (max-width: 768px) {
-  .text-end .btn-group {
+<div class="content-header"></div>
+<div>
+  <h2 class="content-title card-title">Sales Report</h2>
+</div>
+
+<header class="card-header text-center mb-20">
+  <form action="/admin/salesreport" method="get" class="d-inline">
+    <!-- Container for search bar and filter options -->
+    <div
+      class="d-flex justify-content-center align-items-center flex-column flex-md-row"
+      style="gap: 20px"
+    >
+      <!-- Search bar -->
+      <div
+        class="input-group input-group-sm border border-1 border-grey rounded-pill"
+        style="width: 500px"
+      >
+        <input
+          type="text"
+          class="form-control border-0 rounded-pill"
+          placeholder="Search orderId"
+          name="search"
+        />
+        <button class="btn border-0" type="submit">Search</button>
+      </div>
+
+      <!-- Date Filter Options -->
+      <div class="mt-3 mt-md-0">
+        <select
+          name="dateFilter"
+          id="dateFilter"
+          class="form-select"
+          style="width: 200px; border: unset; height: 37px"
+        >
+          <option value="">Select Filter</option>
+          <option value="daily">Today</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <!-- Custom Date Range Fields -->
+      <div id="customDateRange" style="display: none">
+        <label for="startDate" class="form-label">Start Date:</label>
+        <input
+          type="date"
+          name="startDate"
+          id="startDate"
+          class="form-control"
+          style="width: 200px"
+        />
+
+        <label for="endDate" class="form-label mt-2">End Date:</label>
+        <input
+          type="date"
+          name="endDate"
+          id="endDate"
+          class="form-control"
+          style="width: 200px"
+        />
+      </div>
+
+      <!-- Filter button -->
+
+      <div class="mt-3 mt-md-0">
+        <button class="btn btn-primary" id="filter-button" type="submit">
+          Filter
+        </button>
+      </div>
+    </div>
+  </form>
+</header>
+<div class="dashboard-container">
+  <div class="card" style="background-color: #7cbfbf">
+    <h4>Overall Order Amount</h4>
+    <p>₹<%=totalOrderAmount%></p>
+  </div>
+
+  <div class="card" style="background-color: #7cbfbf">
+    <h4>Overall Discount</h4>
+    <p>₹<%=totalDiscount%></p>
+  </div>
+
+  <div class="card" style="background-color: #7cbfbf">
+    <h4>Overall Sales Count</h4>
+    <p><%=totalSalesCount%></p>
+  </div>
+</div>
+<div class="right mt-5">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col"><b>Order ID</b></th>
+        <th scope="col"><b>Invoice Date</b></th>
+        <th scope="col"><b>Items</b></th>
+        <th scope="col"><b>Total Price</b></th>
+        <th scope="col"><b>Total Discount</b></th>
+        <th scope="col"><b>Status</b></th>
+        <th scope="col"><b>Payment Method</b></th>
+        <th scope="col"><b>Payment Status</b></th>
+      </tr>
+    </thead>
+    <tbody style="color: #000000; font-weight: 500">
+      <% for (let i = data.length - 1; i >= 0; i--) { %>
+      <tr>
+        <td><%= data[i].orderId %></td>
+        <td>
+          <%= new Date(data[i].invoice.invoiceDate).toLocaleDateString('en-GB',
+          { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+        </td>
+
+        <% if (data[i].orderedItems && data[i].orderedItems.length > 0) { %>
+
+        <td><%= data[i].orderedItems.length %></td>
+
+        <td><%= data[i].finalAmount %></td>
+        <% } else { %>
+        <td colspan="2">No Ordered Items</td>
+        <% } %>
+
+        <td><%= data[i].discount %></td>
+        <td><%= data[i].status %></td>
+        <td><%= data[i].paymentMethod %></td>
+        <td><%= data[i].paymentStatus %></td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<div class="container mt-3">
+  <nav aria-label="Page navigation">
+    <ul
+      class="pagination justify-content-center mb-20"
+      style="margin-right: 200px"
+    >
+      <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
+
+<div class="modal-footer">
+  <a id="download-pdf" href="<%= pdfUrl %>" class="btn btn-info"
+    >Download PDF</a
+  >
+  <a id="download-excel" href="<%= excelUrl %>" class="btn btn-success"
+    >Download Excel</a
+  >
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+  document.getElementById("dateFilter").addEventListener("change", function () {
+    const customDateRange = document.getElementById("customDateRange");
+
+    // Show custom date range fields if 'custom' is selected
+    if (this.value === "custom") {
+      customDateRange.style.display = "block";
+    } else {
+      customDateRange.style.display = "none";
+    }
+  });
+
+  // document.getElementById('filter-button').addEventListener('click', function() {
+  //     // Submit the form to apply filters
+  //     document.querySelector('form').submit();
+  // });
+</script>
+
+<!-- Styling -->
+<style>
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .table th,
+  .table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+
+  .table tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  .btn-info {
+    background-color: #17a2b8;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+  }
+
+  .input-group {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .pagination .page-link {
+    border-radius: 25px;
+  }
+
+  .dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 20px;
+  }
+
+  .dashboard-cards {
+    display: flex;
     flex-wrap: wrap;
     justify-content: center;
   }
 
-  .btn-group .btn {
-    width: 100%;
+  .card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    border-radius: 10px;
+    width: 200px;
+    margin: 10px;
+    text-align: center;
+    padding: 20px;
+    color: white;
+  }
+
+  .card h4 {
     margin-bottom: 10px;
   }
-}
-</style>
-<div class="content-header">
-  <div>
-      <h2 class="content-title card-title">Sales Report</h2>
-  </div>
-</div>
 
-<div class="container mt-5">
-  <!-- Button Group for Download -->
-  <div class="text-end mb-3">
-    <div class="btn-group">
-      <button onclick="downloadReport('pdf')" class="btn btn-secondary">PDF</button>
-      <button onclick="downloadReport('excel')" class="btn btn-success">Excel</button>
-    </div>
-  </div>
-
-  <!-- Filter Row -->
-  <div class="row align-items-center mb-3">
-    <div class="col-lg-2 col-md-3 mb-2">
-      <input type="text" id="orderId" placeholder="Search by Invoice" class="form-control">
-    </div>
-    <div class="col-lg-2 col-md-2 mb-2">
-      <select id="periodFilter" class="form-control">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-    </div>
-    <div class="col-lg-2 col-md-2 mb-2">
-      <input type="date" id="startDate" class="form-control">
-    </div>
-    <div class="col-lg-2 col-md-2 mb-2">
-      <input type="date" id="endDate" class="form-control">
-    </div>
-  </div>
-
-  <div id="reportContainer">
-    <% if (!reportData || !reportData.report) { %>
-      <p>No data available for the selected period.</p>
-    <% } else { %>
-    <!-- Summary Cards -->
-    <div class="row text-center mb-4">
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <h5>Overall Order Amount</h5>
-            <p>₹<%= reportData.report.overallOrderAmount %></p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <h5>Overall Discount</h5>
-            <p>₹<%= reportData.report.overallDiscount %></p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <div class="card-body">
-            <h5>Overall Sales Count</h5>
-            <p><%= reportData.report.overallSalesCount %></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Orders Table -->
-    <table class="table table-responsive table-striped">
-      <thead>
-        <tr>
-          <th>Invoice No</th>
-          <th>Invoice Date</th>
-          <th>Items</th>
-          <th>Total Price</th>
-          <th>Total Discount</th>
-          <th>Status</th>
-          <th>Payment Method</th>
-          <th>Payment Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% reportData.orderDetails.forEach(order => { %>
-          <tr>
-            <td><%= order.invoice.invoiceNo %></td>
-            <td><%= new Date(order.invoice.invoiceDate).toLocaleDateString() %></td>
-            <td>
-              <% order.orderedItems.forEach(item => { %>
-                <p><%= item.product.productName %> (<%= item.quantity %>)</p>
-              <% }) %>
-            </td>
-            <td>₹<%= order.totalPrice %></td>
-            <td>₹<%= order.discount %></td>
-            <td><%= order.status %></td>
-            <td><%= order.paymentMethod %></td>
-            <td><%= order.paymentStatus %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-    <%}%>
-  </div>
-  <!--pagination start-->
-  <div class="d-flex justify-content-between align-items-center mt-4">
-    <button 
-      class="btn btn-primary" 
-      onclick="fetchPage('<%= reportData.currentPage - 1 %>')" 
-      <% if (reportData.currentPage <= 1) { %> disabled <% } %>>
-      Previous
-    </button>
-  
-    <span>Page <%= reportData.currentPage %> of <%= reportData.totalPages %></span>
-  
-    <button 
-      class="btn btn-primary" 
-      onclick="fetchPage('<%= reportData.currentPage + 1 %>')" 
-      <% if (reportData.currentPage >= reportData.totalPages) { %> disabled <% } %>>
-      Next
-    </button>
-  </div>
-  <!--pagination end-->
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $(document).ready(function() {
-    let currentPage = 1;
-    // Function to fetch and update the report
-    function fetchReport() {
-      const filter = $('#periodFilter').val();
-      const startDate = $('#startDate').val();
-      const endDate = $('#endDate').val();
-      const orderId = $('#orderId').val();
-     
-      $.ajax({
-        url: '/admin/report', 
-        method: 'GET',
-        data: {
-          filter: filter,
-          startDate: startDate,
-          endDate: endDate,
-          orderId:orderId,
-          page : currentPage
-        },
-        success: function(data) {
-          // Update the report data in the DOM
-          $('#reportContainer').html(data);
-        },
-        error: function(error) {
-          console.error('Error fetching report:', error);
-        }
-      });
-    }
-
-    // Event listeners for input changes
-    $('#periodFilter, #startDate, #endDate ,#orderId').on('change', fetchReport);
-
-    function fetchPage(page) {
-    currentPage = page;
-    fetchReport();
-}
-  });
-
-  function downloadReport(type) {
-    const filter = document.getElementById("periodFilter").value;
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-
-    const url = `/admin/download/${type}?filter=${filter}&startDate=${startDate}&endDate=${endDate}`;
-    window.location.href = url;
+  .card p {
+    margin: 5px 0;
+    font-size: 1.5rem;
   }
-</script>
+
+  .card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+  }
+</style>
 <%- include("../partial/admin/footer.ejs") %>

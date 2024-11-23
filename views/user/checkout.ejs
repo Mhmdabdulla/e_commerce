@@ -338,7 +338,7 @@
                 class="form-control"
                 id="add-name"
                 name="name"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -348,7 +348,7 @@
                 class="form-control"
                 id="add-city"
                 name="city"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -358,7 +358,7 @@
                 class="form-control"
                 id="add-landmark"
                 name="landMark"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -368,7 +368,7 @@
                 class="form-control"
                 id="add-state"
                 name="state"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -378,7 +378,7 @@
                 class="form-control"
                 id="add-pincode"
                 name="pincode"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -388,7 +388,7 @@
                 class="form-control"
                 id="add-phone"
                 name="phone"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -400,7 +400,7 @@
                 class="form-control"
                 id="add-altPhone"
                 name="altPhone"
-                required
+                
               />
             </div>
           </div>
@@ -447,7 +447,7 @@
                 class="form-control"
                 id="edit-name"
                 name="name"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -457,7 +457,7 @@
                 class="form-control"
                 id="edit-city"
                 name="city"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -467,7 +467,7 @@
                 class="form-control"
                 id="edit-landmark"
                 name="landMark"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -477,7 +477,7 @@
                 class="form-control"
                 id="edit-state"
                 name="state"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -487,7 +487,7 @@
                 class="form-control"
                 id="edit-pincode"
                 name="pincode"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -497,7 +497,7 @@
                 class="form-control"
                 id="edit-phone"
                 name="phone"
-                required
+                
               />
             </div>
             <div class="form-group">
@@ -509,7 +509,7 @@
                 class="form-control"
                 id="edit-altPhone"
                 name="altPhone"
-                required
+                
               />
             </div>
           </div>
@@ -817,7 +817,10 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        Swal.fire(`${isCouponApplied ? 'Coupon removed' : 'Coupon applied'} successfully!`, '', 'success');
+        Swal.fire(`${isCouponApplied ? 'Coupon removed' : 'Coupon applied'} successfully!`, '', 'success')
+        .then(()=>{
+          location.reload()
+        })
         if (isCouponApplied) {
             // Coupon was removed
             document.getElementById('couponSelect').disabled = false; // Enable the coupon selection

@@ -6,7 +6,7 @@ const cartControllers = require('../controllers/user/cartControllers')
 const checkoutController = require('../controllers/user/checkoutController')
 const wishlistController = require('../controllers/user/whishlistControllers')
 const couponController = require('../controllers/user/couponController')
-const {userAuth, adminAuth} = require('../middlewares/auth')
+const {userAuth} = require('../middlewares/auth')
 
 const passport = require('passport')
 

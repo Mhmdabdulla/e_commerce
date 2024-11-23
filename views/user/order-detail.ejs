@@ -8,6 +8,7 @@
         <h5>Order ID: <%= order.orderId %></h5>
         <p>Order Date: <%= order.createdOn.toLocaleDateString() %></p>
         <p>Status: <strong><%= order.status %></strong></p>
+        <p>Delivering to: <%=order.address.name%></p>
         <p>Shipping Address: <%= order.address.landMark %>, <%= order.address.city %>, <%= order.address.pincode %></p>
         <p>Payment Method: <%= order.paymentMethod %></p>
         <p>Payment Status: <strong><%= order.paymentStatus%></strong></p>

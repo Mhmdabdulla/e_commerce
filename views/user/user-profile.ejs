@@ -2,307 +2,476 @@
 
 <!-- Additional Styles for Profile Page -->
 <style>
-    /* Profile Page Specific Styles */
+  /* Profile Page Specific Styles */
+  .profile-container {
+    padding-top: 8rem; /* Adjust based on your header height */
+    padding-bottom: 50px; /* Adjust based on your footer height */
+    background-color: #f5f5f5;
+  }
+
+  .sidebar {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    border-radius: 8px;
+  }
+
+  .sidebar .profile-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 15px;
+  }
+
+  .sidebar h2 {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .sidebar ul li a {
+    color: #555;
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .sidebar ul li a.active {
+    color: #fff;
+    background-color: #f98612;
+  }
+
+  .sidebar ul li a:hover {
+    background-color: #e9f5ff;
+    color: #007bff;
+  }
+
+  .sidebar ul li ul {
+    padding-left: 20px;
+  }
+
+  .content {
+    background-color: #fff;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .content .edit-link,
+  .content .save-btn,
+  .content .cancel-btn {
+    font-size: 0.875rem;
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
+  .content .edit-link:hover,
+  .content .save-btn:hover,
+  .content .cancel-btn:hover {
+    color: #0056b3;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    font-weight: bold;
+    color: #555;
+  }
+
+  .form-control:disabled {
+    background-color: #f9f9f9;
+    opacity: 1;
+  }
+
+  @media (max-width: 992px) {
     .profile-container {
-        padding-top: 8rem; /* Adjust based on your header height */
-        padding-bottom: 50px; /* Adjust based on your footer height */
-        background-color: #f5f5f5;
+      padding-top: 80px;
     }
 
     .sidebar {
-        background-color: #fff;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        height: 100%;
-        border-radius: 8px;
+      padding: 15px;
     }
 
     .sidebar .profile-img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        margin-bottom: 15px;
+      width: 60px;
+      height: 60px;
     }
 
     .sidebar h2 {
-        font-size: 1.25rem;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .sidebar ul li a {
-        color: #555;
-        font-size: 1rem;
-        padding: 10px 15px;
-        border-radius: 5px;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    .sidebar ul li a.active {
-        color: #fff;
-        background-color: #f98612;
-    }
-
-    .sidebar ul li a:hover {
-        background-color: #e9f5ff;
-        color: #007bff;
-    }
-
-    .sidebar ul li ul {
-        padding-left: 20px;
+      font-size: 1rem;
     }
 
     .content {
-        background-color: #fff;
-        padding: 30px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
+      padding: 20px;
     }
 
     .content h3 {
-        font-size: 1.5rem;
-        margin-bottom: 25px;
-        color: #333;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      font-size: 1.25rem;
     }
-
-    .content .edit-link,
-    .content .save-btn,
-    .content .cancel-btn {
-        font-size: 0.875rem;
-        color: #007bff;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        background: none;
-        padding: 0;
-    }
-
-    .content .edit-link:hover,
-    .content .save-btn:hover,
-    .content .cancel-btn:hover {
-        color: #0056b3;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-label {
-        font-weight: bold;
-        color: #555;
-    }
-
-    .form-control:disabled {
-        background-color: #f9f9f9;
-        opacity: 1;
-    }
-
-    @media (max-width: 992px) {
-        .profile-container {
-            padding-top: 80px;
-        }
-
-        .sidebar {
-            padding: 15px;
-        }
-
-        .sidebar .profile-img {
-            width: 60px;
-            height: 60px;
-        }
-
-        .sidebar h2 {
-            font-size: 1rem;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .content h3 {
-            font-size: 1.25rem;
-        }
-    }
+  }
 </style>
 
 <div class="container-fluid profile-container">
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar Start -->
-            <div class="col-lg-3 col-md-4 mb-4">
-                <div class="sidebar">
-                    <div class="text-center">
-                        <img src="/admin-assets/imgs/people/avatar2.png" alt="Profile Picture" class="rounded-circle profile-img">
-                        <h2>Hello, <%=user.name%></h2>
-                    </div>
-                    <ul class="list-unstyled">
-                        <li class="mb-3">
-                            <a href="/profile" class="d-flex align-items-center active">
-                                <i class="fas fa-box me-2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="mb-3">
-                            <a href="/orders" class="d-flex align-items-center">
-                                <i class="fas fa-box me-2"></i> My Orders
-                            </a>
-                        </li>
-                        <li class="mb-3">
-                            <a href="/address" class="d-flex align-items-center">
-                                <i class="fas fa-box me-2"></i> Addresses
-                            </a>
-                        </li>
-                        <li class="mb-3">
-                            <a href="/cart" class="d-flex align-items-center">
-                                <i class="fas fa-shopping-cart me-2"></i> Cart
-                            </a>
-                        </li>
-                        <li class="mb-3">
-                            <a href='/wishlist' class="d-flex align-items-center">
-                                <i class="fas fa-shopping-cart me-2"></i> Whishlist
-                            </a>
-                        </li>
-                        <li class="mb-3">
-                            <a href='/wallet' class="d-flex align-items-center">
-                                <i class="fas fa-shopping-cart me-2"></i> Wallet
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <!-- Sidebar End -->
-
-            <!-- Content Start -->
-            <div class="col-lg-9 col-md-8">
-                <div class="content">
-                    <!-- Personal Information Section -->
-                    <div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel" aria-labelledby="tab-dashboard-link">
-                        <h3>
-                            Personal Information
-                            <button id="edit-info-btn" class="edit-link">Edit</button>
-                            <div id="save-cancel-buttons" style="display: none;">
-                                <button type="button" class="save-btn" onclick="savePersonalInfo()">Save</button>
-                                <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
-                            </div>
-                        </h3>
-                        <form id="personal-info-form">
-                            <div class="form-group">
-                                <label for="first-name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="first-name" value="<%=user.name%>" disabled>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email" class="form-label">
-                                    Email Address
-                                </label>
-                                <input type="email" class="form-control" id="email" value="<%=user.email%>" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="mobile" class="form-label">
-                                    Mobile Number
-                                </label>
-                                <input type="text" class="form-control" id="mobile" value="<%=user.phone%>" disabled>
-                            </div>
-                        </form>
-                    </div>
-
-                    <hr>
-
-                    <!-- Change Password Section -->
-                    <div class="tab-pane fade show active" id="tab-change-password" role="tabpanel" aria-labelledby="tab-change-password-link">
-                        <h3>Change Password</h3>
-                        <form action="/user/change-password" method="POST" id="change-password-form">
-                            <div class="form-group">
-                                <label for="current-password" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="current-password" name="currentPassword" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="new-password" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="new-password" name="newPassword" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm-password" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="confirm-password" name="confirmPassword" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Change Password</button>
-                        </form>
-                    </div>
-                    <hr>
-                    <div style="margin-top: 30px;">
-                        <h6>Invite friends, get rewards</h6>
-                        <p>share your code : <%=user.referralCode%></p>
-                    </div>
-                </div>
-            </div>
-            <!-- Content End -->
+  <div class="container">
+    <div class="row">
+      <!-- Sidebar Start -->
+      <div class="col-lg-3 col-md-4 mb-4">
+        <div class="sidebar">
+          <div class="text-center">
+            <img
+              src="/admin-assets/imgs/people/avatar2.png"
+              alt="Profile Picture"
+              class="rounded-circle profile-img"
+            />
+            <h2>Hello, <%=user.name%></h2>
+          </div>
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <a href="/profile" class="d-flex align-items-center active">
+                <i class="fas fa-user me-2"></i> Dashboard
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="/orders" class="d-flex align-items-center">
+                <i class="fas fa-file me-2"></i> My Orders
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="/address" class="d-flex align-items-center">
+                <i class="fas fa-address-book me-2"></i> Addresses
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="/cart" class="d-flex align-items-center">
+                <i class="fas fa-shopping-cart me-2"></i> Cart
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="/wishlist" class="d-flex align-items-center">
+                <i class="fas fa-heart me-2"></i> Whishlist
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="/wallet" class="d-flex align-items-center">
+                <i class="fas fa-wallet me-2"></i> Wallet
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+      <!-- Sidebar End -->
+
+      <!-- Content Start -->
+      <div class="col-lg-9 col-md-8">
+        <div class="content">
+          <!-- Personal Information Section -->
+          <div
+            class="tab-pane fade show active"
+            id="tab-dashboard"
+            role="tabpanel"
+            aria-labelledby="tab-dashboard-link"
+          >
+            <h3>
+              Personal Information
+              <button id="edit-info-btn" class="edit-link">Edit</button>
+              <div id="save-cancel-buttons" style="display: none">
+                <button
+                  type="button"
+                  class="save-btn"
+                  onclick="savePersonalInfo()"
+                >
+                  Save
+                </button>
+                <button type="button" class="cancel-btn" onclick="cancelEdit()">
+                  Cancel
+                </button>
+              </div>
+            </h3>
+            <form id="personal-info-form">
+              <div class="form-group">
+                <label for="first-name" class="form-label">Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="first-name"
+                  value="<%=user.name%>"
+                  disabled
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="email" class="form-label"> Email Address </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  value="<%=user.email%>"
+                  disabled
+                />
+              </div>
+              <div class="form-group">
+                <label for="mobile" class="form-label"> Mobile Number </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mobile"
+                  value="<%=user.phone%>"
+                  disabled
+                />
+              </div>
+            </form>
+          </div>
+
+          <hr />
+
+          <!-- Change Password Section -->
+          <div
+            class="tab-pane fade show active"
+            id="tab-change-password"
+            role="tabpanel"
+            aria-labelledby="tab-change-password-link"
+          >
+            <h3>Change Password</h3>
+            <form
+            onsubmit="changePassword(event)"
+              id="change-password-form"
+            >
+              <div class="form-group">
+                <label for="current-password" class="form-label"
+                  >Current Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="current-password"
+                  name="currentPassword"
+                
+                />
+              </div>
+              <div class="form-group">
+                <label for="new-password" class="form-label"
+                  >New Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="new-password"
+                  name="newPassword"
+                
+                />
+              </div>
+              <div class="form-group">
+                <label for="confirm-password" class="form-label"
+                  >Confirm New Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirm-password"
+                  name="confirmPassword"
+                
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Change Password
+              </button>
+            </form>
+          </div>
+          <hr />
+          <div style="margin-top: 30px">
+            <h6>Invite friends, get rewards</h6>
+            <p>share your code : <%=user.referralCode%></p>
+          </div>
+        </div>
+      </div>
+      <!-- Content End -->
     </div>
+  </div>
 </div>
 
 <%- include("../partial/user/footer.ejs")%>
+<!-- SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+
+<!-- SweetAlert JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
 <!-- Additional Scripts -->
 <script>
-    const editInfoBtn = document.getElementById('edit-info-btn');
-    const saveCancelButtons = document.getElementById('save-cancel-buttons');
-    const personalInfoForm = document.getElementById('personal-info-form');
-    const editLink = document.querySelector('.edit-link');
+  const editInfoBtn = document.getElementById("edit-info-btn");
+  const saveCancelButtons = document.getElementById("save-cancel-buttons");
+  const personalInfoForm = document.getElementById("personal-info-form");
+  const editLink = document.querySelector(".edit-link");
 
-    editInfoBtn.addEventListener('click', () => {
-   // Enable only specific form fields (excluding the email field)
-   const nameInput = document.getElementById('first-name');
-    const phoneInput = document.getElementById('mobile');
-    
+  editInfoBtn.addEventListener("click", () => {
+    // Enable only specific form fields (excluding the email field)
+    const nameInput = document.getElementById("first-name");
+    const phoneInput = document.getElementById("mobile");
+
     nameInput.disabled = false;
     phoneInput.disabled = false;
 
-        // Show save and cancel buttons
-        saveCancelButtons.style.display = 'inline-block';
+    // Show save and cancel buttons
+    saveCancelButtons.style.display = "inline-block";
 
-        // Hide edit button
-        editInfoBtn.style.display = 'none';
-    });
+    // Hide edit button
+    editInfoBtn.style.display = "none";
+  });
 
-    function savePersonalInfo() {
-        // Collect form data
-        const name = document.getElementById('first-name').value.trim();
-       
-        const phone = document.getElementById('mobile').value.trim();
+  function showError(text){
+        swal({
+            title: "Error!",
+            text: text,
+            icon: "error",
+            button: "OK",
+        });
+    }
 
-        // Basic validation (you can enhance this)
-        if (!name || !phone) {
-            alert('All fields are required.');
-            return;
+  function savePersonalInfo() {
+    // Collect form data
+    const name = document.getElementById("first-name").value.trim();
+
+    const phone = document.getElementById("mobile").value.trim();
+
+
+        // Name validation
+        if (!name) {
+             showError("Name is required")
+        return;
+    } else if (name.length < 2 || name.length > 50) {
+        showError("Name must be between 2 and 50 characters.")
+        return;
+    }
+
+        // Phone number validation
+        if (!phone) {
+            showError( "Phone number required")
+        return;
+
+    } else {
+        const phoneRegex = /^[0-9]{10}$/; // Adjust regex based on your requirements
+        if (!phoneRegex.test(phone)) {
+            showError("Phone number must be 10 digits long and contain only numbers.")
+        return;
         }
-
-        // Submit the form data via AJAX or regular form submission
-        // Here, we'll use a regular form submission for simplicity
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/user/update-profile';
-
-        const nameInput = document.createElement('input');
-        nameInput.type = 'hidden';
-        nameInput.name = 'name';
-        nameInput.value = name;
-        form.appendChild(nameInput);
-
-
-
-        const phoneInput = document.createElement('input');
-        phoneInput.type = 'hidden';
-        phoneInput.name = 'phone';
-        phoneInput.value = phone;
-        form.appendChild(phoneInput);
-
-        document.body.appendChild(form);
-        form.submit();
     }
 
-    function cancelEdit() {
-        // Reload the page to reset the form
-        window.location.reload();
+    // Submit the form data via AJAX or regular form submission
+    // Here, we'll use a regular form submission for simplicity
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/user/update-profile";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "hidden";
+    nameInput.name = "name";
+    nameInput.value = name;
+    form.appendChild(nameInput);
+
+    const phoneInput = document.createElement("input");
+    phoneInput.type = "hidden";
+    phoneInput.name = "phone";
+    phoneInput.value = phone;
+    form.appendChild(phoneInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function cancelEdit() {
+    // Reload the page to reset the form
+    window.location.reload();
+  }
+  
+
+  //change password handling
+    async function changePassword(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get form values
+    const currentPassword = document.getElementById("current-password").value;
+    const newPassword = document.getElementById("new-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+            showError("All field required")  
+            return;      
     }
+
+    // Validate new password
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 characters, at least one letter and one number
+    if (!passwordRegex.test(newPassword)) {
+showError("New password must be at least 8 characters long and contain both letters and numbers.")
+        return;
+    }
+
+    // Check if new password and confirm password match
+    if (newPassword !== confirmPassword) {
+showError("New password and confirm password do not match.")
+        return;
+    }
+
+    // Prepare data for submission
+    const data = {
+        currentPassword,
+        newPassword,
+        confirmPassword
+    };
+
+    try {
+        const response = await fetch('/user/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            // Handle success
+            swal({
+                title: "Success!",
+                text: "Your password has been changed successfully.",
+                icon: "success",
+                button: "OK",
+            }).then(() => {
+                window.location.href = '/profile'; // Redirect to profile page
+            });
+        } else {
+            // Handle failure
+            const errorText = await response.text();
+            swal({
+                title: "Error!",
+                text: errorText || "An error occurred while changing your password.",
+                icon: "error",
+                button: "OK",
+            });
+        }
+    } catch (error) {
+        console.error('Error in changePassword', error);
+        swal({
+            title: "Error!",
+            text: "An unexpected error occurred.",
+            icon: "error",
+            button: "OK",
+        });
+    }
+}
 </script>

@@ -43,6 +43,10 @@ const placeOrder = async (req,res,next) =>{
 
 
         const userId = req.session.user;  
+        const user = await User.findOne({_id:userId})
+        if (!user) {
+            return res.status(400).json({success:false , message : 'user not found'})
+        }
         const cart = await Cart.findOne({ userId }).populate('items.productId');
 
         if (!cart || cart.items.length === 0) {
@@ -57,14 +61,17 @@ const placeOrder = async (req,res,next) =>{
 
 
             // Determine if a coupon is applied
-    const isCouponApplied = !!cart.appliedCoupon;
+    const isCouponApplied = !(cart.appliedCoupon.code === null && cart.appliedCoupon.discountAmount === 0);
     const appliedCoupon = isCouponApplied
       ? {
           code: cart.appliedCoupon.code,
-          discountAmount: cart.totalDiscount,
+          discountAmount: cart.appliedCoupon.discountAmount,
           discountType: cart.appliedCoupon.discountType,
         }
       : null;
+
+
+
 
         if (paymentMethod === 'Cash on Delivery') {
 
@@ -90,7 +97,13 @@ const placeOrder = async (req,res,next) =>{
 
         await newOrder.save();
 
-        const user = await User.findOne({_id:userId})
+     if(newOrder.couponApplied){
+        const coupon = await Coupon.findOne({code : newOrder.appliedCoupon.code})
+        // Mark the coupon as used by the user
+        user.usedCoupons.push(coupon._id);
+        await user.save();
+
+     }
 
         // Clear the user's cart after placing order
         await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 ,appliedCoupon : { code: null, discountAmount: 0 }});
@@ -100,8 +113,7 @@ const placeOrder = async (req,res,next) =>{
 
     //wallet payment 
     else if (paymentMethod === "Wallet") {
-        // Find the user
-        const user = await User.findById(userId);
+       
         if (!user || !user.wallet) {
             return res.status(404).json({ success: false, message: "User  or wallet not found" });
         }
@@ -152,6 +164,15 @@ const placeOrder = async (req,res,next) =>{
 
         await newOrder.save();
 
+
+        if(newOrder.couponApplied){
+            const coupon = await Coupon.findOne({code : newOrder.appliedCoupon.code})
+            // Mark the coupon as used by the user
+            user.usedCoupons.push(coupon._id);
+            await user.save();
+    
+         }
+
         // Clear the user's cart after placing order
         await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0, appliedCoupon: { code: null, discountAmount: 0 } });
         
@@ -187,6 +208,15 @@ const placeOrder = async (req,res,next) =>{
         });
   
         await newOrder.save();
+
+        if(newOrder.couponApplied){
+            const coupon = await Coupon.findOne({code : newOrder.appliedCoupon.code})
+            console.log(coupon)
+            // Mark the coupon as used by the user
+            user.usedCoupons.push(coupon._id);
+            await user.save();
+    
+         }
 
         // Clear the user's cart after placing order
         await Cart.findOneAndUpdate({ userId }, { items: [], totalPrice: 0 ,appliedCoupon : { code: null, discountAmount: 0 }});
