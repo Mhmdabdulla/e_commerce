@@ -180,6 +180,7 @@ const verifyOtp = async function (req, res, next) {
             type: "credit",
             amount: rewardAmount,
             description: "Referral reward credited",
+            date: new Date(),
           });
           referrerWallet.balance += rewardAmount; // Increment balance
           await referrerWallet.save();
@@ -192,6 +193,7 @@ const verifyOtp = async function (req, res, next) {
             type: "credit",
             amount: rewardAmount,
             description: "Welcome reward for signing up",
+            date: new Date(),
           });
           userWallet.balance += rewardAmount; // Increment balance
           await userWallet.save();

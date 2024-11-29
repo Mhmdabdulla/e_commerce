@@ -119,7 +119,6 @@ const excelUrl = `/admin/salesreport/excel?${new URLSearchParams(req.query).toSt
 const downloadPDF = async (req, res, next) => {
   try {
       const { search = "", dateFilter, startDate, endDate } = req.query; // Search query from the user
-      console.log('PDF Query Parameters:', search, dateFilter, startDate, endDate);
       const orders = await getSalesData(search, dateFilter, startDate, endDate); // Fetch data based on filters
       
       // console.log('Filtered Orders:', orders);
@@ -156,6 +155,17 @@ const downloadPDF = async (req, res, next) => {
 
       let startX = 50; // Starting position for table
       let startY = doc.y; // Y-coordinate to maintain current position
+      const pageHeight = doc.page.height;
+      const marginBottom = 50;
+
+              // Helper function to check for page break
+              const checkPageBreak = () => {
+                if (doc.y + 20 > pageHeight - marginBottom) {
+                    doc.addPage();
+                    startY = doc.y; // Reset Y position on the new page
+                    drawHeaders(); // Redraw headers on the new page
+                }
+            };
 
       // Draw table headers
       headers.forEach((header, i) => {
@@ -186,7 +196,7 @@ const downloadPDF = async (req, res, next) => {
               startX += columnWidths[i];
           });
 
-          doc.moveDown(0.5); // Add some space between rows
+          doc.moveDown(3); // Add some space between rows
       });
 
       // Finalize the PDF

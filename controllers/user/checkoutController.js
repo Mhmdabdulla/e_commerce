@@ -10,7 +10,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { error } = require('console');
 const env = require('dotenv').config();
-const PDFDocument = require('pdfkit')
+const easyinvoice = require('easyinvoice');
 
 // Initialize Razorpay instance with credentials
 const razorpay = new Razorpay({
@@ -571,57 +571,71 @@ const getWallet = async (req, res,next) => {
     }
 };
 
-const generateInvoice = async (req, res ,next) => {
+
+
+const generateInvoice = async (req, res, next) => {
     try {
         const { orderId } = req.params;
 
         // Find the order by ID
         const order = await Order.findOne({ orderId }).populate('orderedItems.product').populate('address');
-        console.log('Order : ', order)
 
         // Check if the order exists and is delivered
         if (!order || order.status !== 'Delivered') {
             return res.status(404).json({ success: false, message: 'Order not found or not delivered.' });
         }
 
-        // Create a PDF document
-        const doc = new PDFDocument();
+        // Invoice Data in JSON format
+        const invoiceData = {
+            "sender": {
+                "company": "Foody",
+                "address": "Calicut",
+                "zip": "695847",
+                "city": "Kozikode",
+                "country": "India",
+                "custom1": "GSTIN: 123ABC456DEF"
+            },
+            "client": {
+                "company": order.address.fullName,
+                "address": `${order.address.landMark}, ${order.address.city}`,
+                "zip": order.address.pincode,
+                "city": order.address.city,
+                "country": "India"
+            },
+            "information": {
+                "number": order.invoice.invoiceNo,
+                "date": order.invoice.invoiceDate.toLocaleDateString(),
+                "due-date": order.createdOn.toLocaleDateString()
+            },
+            "products": order.orderedItems.map(item => ({
+                "quantity": item.quantity,
+                "description": item.product.productName,
+                "price": (item.price / item.quantity).toFixed(2)
+            })),
+            "bottom-notice": order.discount > 0 ?  `wow!, you saved ${order.discount} on this order`: "Thank you for shopping with us!",
+            "settings": {
+                "currency": "INR"
+            },
+            "totals": [
+                { "label": "Total MRP", "amount": order.totalMRP.toFixed(2) },
+                { "label": "Discount", "amount": `-${order.discount.toFixed(2)}` }, // Show discount as negative
+                { "label": "Total", "amount": order.finalAmount.toFixed(2) }
+            ]
+        };
 
-        // Set the response headers
+        // Generate the invoice PDF
+        const pdfData = await easyinvoice.createInvoice(invoiceData);
+
+        // Send the PDF as a response
         res.setHeader('Content-disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
         res.setHeader('Content-type', 'application/pdf');
-
-        // Pipe the PDF into the response
-        doc.pipe(res);
-
-        // Add content to the PDF
-        doc.fontSize(20).text('Invoice', { align: 'center' });
-        doc.moveDown();
-
-        doc.fontSize(12).text(`Invoice No: ${order.invoice.invoiceNo}`);
-        doc.text(`Invoice Date: ${order.invoice.invoiceDate.toLocaleDateString()}`);
-        doc.text(`Order ID: ${order.orderId}`);
-        doc.text(`Order Date: ${order.createdOn.toLocaleDateString()}`);
-        doc.text(`Total Amount: ₹${order.finalAmount.toFixed(2)}`);
-        doc.moveDown();
-
-        doc.text('Ordered Items:', { underline: true });
-        order.orderedItems.forEach(item => {
-            doc.text(`- ${item.product.productName} (Quantity: ${item.quantity}) - ₹${item.price.toFixed(2)}`);
-        });
-
-        doc.moveDown();
-        doc.text(`Shipping Address: ${order.address.landMark}, ${order.address.city}, ${order.address.pincode}`);
-        doc.text(`Payment Method: ${order.paymentMethod}`);
-        doc.text(`Payment Status: ${order.paymentStatus}`);
-
-        // Finalize the PDF and end the stream
-        doc.end();
+        res.send(Buffer.from(pdfData.pdf, 'base64'));
     } catch (error) {
         console.error('Error generating invoice:', error);
-        next(error)
+        next(error);
     }
 };
+
 
 module.exports = {
     getCheckoutPage,
