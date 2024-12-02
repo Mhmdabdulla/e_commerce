@@ -59,12 +59,19 @@
                 <select class="form-control bg-info text-white" id="orderStatus" 
                         style="border: 2px solid #007bff; border-radius: 5px;" 
                         onchange="changeOrderStatus('<%= order.orderId %>')">
+                    <%if(order.status !== 'Cancel Request' && order.status !== 'Return Request'){%>
                     <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
                     <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                     <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                     <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                    <%}else{%>
+                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Verify</option>
+                    <%if(order.status == 'Cancel Request'){%>
+                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Confirm Cancellation</option>
+                    <%}else{%>
+                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Confirm Return</option>
+                    <%}%>
+                    <%}%>
                 </select>
             <% } else { %>
                 <label>Order Status: 
@@ -100,9 +107,12 @@
                                     <select class="form-control bg-info text-white" id="itemStatus<%= item.product._id %>" 
                                             style="border: 2px solid #007bff; border-radius: 5px;" 
                                             onchange="changeItemStatus('<%= order.orderId %>', '<%= item.product._id %>', this.value)">
-                                            <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Verify Cancel</option>
-                                            <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Verify Return</option>
+                                            <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %>>Verify</option>
+                                            <%if(item.status == 'Cancel Request'){%>
+                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %>>Confirm Cancel</option>
+                                            <%}else{%>
+                                            <option value="Returned" <%= item.status === 'Returned' ? 'selected' : '' %>>Confirm Return</option>
+                                            <%}%>
 
                                     </select>
                                 <% } else { %>

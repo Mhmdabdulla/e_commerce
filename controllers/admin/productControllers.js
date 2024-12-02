@@ -22,6 +22,7 @@ const getProductAddPage = async (req,res,next)=>{
 const addProducts = async (req,res,next)=>{
     try {
         const products = req.body;
+        console.log(products)
         const productExist = await Product.findOne({
             productName : products.productName
         });
@@ -39,7 +40,7 @@ const addProducts = async (req,res,next)=>{
                     images.push(req.files[i].filename); 
                 }
             }
-            const category = await Category.findOne({_id:products.category})
+            const category = await Category.findOne({name:products.category})
 
             if(!category){
                 return res.status(400).json('invalid category name')

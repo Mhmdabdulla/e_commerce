@@ -442,7 +442,7 @@ body {
                                     <label for="review-content">Your Review</label>
                                     <textarea class="form-control" id="review-content" rows="4" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                                <button type="button" onclick="addReview()" class="btn btn-primary">Submit Review</button>
                             </form>
                         </div><!-- End .review-form -->
                     </div><!-- End .reviews -->
@@ -608,6 +608,20 @@ body {
               });
           });
       });
+
+      //add review
+      function addReview(){
+        Swal.fire({
+                          icon: 'success',
+                          title: 'Review added!',
+                          text: 'Thankyou for providing feedback',
+                          showConfirmButton: false,
+                          timer: 2000
+                      })
+                      .then(()=>{
+                        location.reload()
+                      })
+      }
   </script>
   
   

@@ -150,7 +150,7 @@ const downloadPDF = async (req, res, next) => {
 
 
       // Set column headers with alignment
-      const headers = ['Order ID', 'Invoice Date', 'Items', 'Total Price', 'Total Discount', 'Status', 'Payment Method', 'Payment Status'];
+      const headers = ['Invoice No', 'Invoice Date', 'Items', 'Total Price', 'Total Discount', 'Status', 'Payment Method', 'Payment Status'];
       const columnWidths = [80, 60, 40, 60, 60, 60, 80, 80]; // Set column widths
 
       let startX = 50; // Starting position for table
@@ -178,7 +178,7 @@ const downloadPDF = async (req, res, next) => {
       // Add table data
       orders.forEach(order => {
           const row = [
-              order.orderId,
+              order.invoice.invoiceNo,
               new Date(order.invoice.invoiceDate).toLocaleDateString(),
               order.orderedItems.reduce((total, item) => total + item.quantity, 0),
               order.orderedItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2),
@@ -196,7 +196,7 @@ const downloadPDF = async (req, res, next) => {
               startX += columnWidths[i];
           });
 
-          doc.moveDown(3); // Add some space between rows
+          doc.moveDown(1); // Add some space between rows
       });
 
       // Finalize the PDF
