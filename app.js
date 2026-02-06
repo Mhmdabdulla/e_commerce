@@ -49,7 +49,7 @@ app.use('/admin',adminRouter)
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT , ()=>{
     console.log(`Running on ${PORT}`)
