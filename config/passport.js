@@ -1,6 +1,7 @@
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userSchema')
+const User = require('../models/userSchema');
+const Wallet = require('../models/walletSchema');
 const env = require('dotenv').config();
 
 
@@ -17,10 +18,29 @@ async (accessToken,refreshToken,profile,done)=>{
         
             return done(null,user)
         }else{
+            //create the wallet for the user
+            const newWallet = new Wallet({
+                balance : 0
+            })
+            await newWallet.save();
+
+            //generate unique referral code
+            let referralCode;
+            let isUnique = false;
+            while(!isUnique){
+                referralCode = Math.random().toString(36).substring(2,8).toUpperCase();
+                const existingUser = await User.findOne({referralCode :referralCode});
+                if(!existingUser){
+                    isUnique = true;
+                }
+            }
+
             user = new User({
                 name : profile.displayName,
                 email : profile.emails[0].value,
-                googleId : profile.id
+                googleId : profile.id,
+                wallet : newWallet._id,
+                referralCode : referralCode,
             })
             await user.save();
 
@@ -28,7 +48,7 @@ async (accessToken,refreshToken,profile,done)=>{
         }
         
     } catch (error) {
-        return done(err,null)
+        return done(error,null)
         
     }
 }
