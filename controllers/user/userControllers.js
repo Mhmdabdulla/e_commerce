@@ -51,14 +51,19 @@ const generateOtp = () => {
 async function sendVerificationEmail(email, otp) {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      //    port : 587,
-      //    secure : false,
-      //      requireTLS :true,
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, 
       auth: {
         user: process.env.NODEMAILER_EMAIL,
         pass: process.env.NODEMAILER_PASSWORD,
       },
+
+      tls: {
+        rejectUnauthorized: false,
+        minVersion: "TLSv1.2",
+      },
+      connectionTimeout: 10000, // 10 seconds
     });
     const info = await transporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
@@ -173,7 +178,7 @@ const verifyOtp = async function (req, res, next) {
         const rewardAmount = 10; // Define the reward amount
         // Add transaction to the referrer's wallet
         const referrerWallet = await Wallet.findById(
-          userDeatils.referrer.wallet
+          userDeatils.referrer.wallet,
         );
         if (referrerWallet) {
           referrerWallet.transactions.push({
